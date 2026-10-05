@@ -1,17 +1,17 @@
 # Graph Report - GodotOceanWaves  (2026-10-05)
 
 ## Corpus Check
-- 23 files · ~856,971 words
+- 23 files · ~857,269 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 78 file(s) not represented in the graph (top: .uid 16, .import 15, .gd 13)
 
 ## Summary
-- 388 nodes · 544 edges · 18 communities
+- 389 nodes · 545 edges · 18 communities
 - Extraction: 97% EXTRACTED · 3% INFERRED · 0% AMBIGUOUS · INFERRED: 19 edges (avg confidence: 0.83)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `7d48a1e3`
+- Built from commit: `70daf40c`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -66,7 +66,7 @@
 
 ### Community 0 - "ImGuiGD"
 Cohesion: 0.07
-Nodes (17): Action, Callable, FontFile, IntPtr, Texture2D, Viewport, ImGuiGD, JoyAxisDeadZone (+9 more)
+Nodes (19): Action, Callable, FontFile, IntPtr, SubViewport, Texture2D, Viewport, ImGuiGD (+11 more)
 
 ### Community 1 - "imgui-godot.h"
 Cohesion: 0.10
@@ -113,8 +113,8 @@ Cohesion: 0.17
 Nodes (11): FontFile, List, Texture2D, FontParams, Font, FontSize, Merge, Ranges (+3 more)
 
 ### Community 12 - ".Image"
-Cohesion: 0.19
-Nodes (10): SubViewport, SubViewport, AtlasTexture, SubViewport, Texture2D, Vector2, Vector4, Widgets (+2 more)
+Cohesion: 0.29
+Nodes (8): AtlasTexture, SubViewport, Texture2D, Vector2, Vector4, Widgets, uv0, uv1
 
 ### Community 13 - "BackendNet"
 Cohesion: 0.13
@@ -134,25 +134,25 @@ Nodes (3): Rid, DummyRenderer, Name
 
 ### Community 17 - "GodotOceanWaves"
 Cohesion: 0.10
-Nodes (19): Attribution, Daylight controls, Fast Fourier Transform, GodotOceanWaves, Introduction, Lighting Model, Load Balancing, Measured validation — 2026-10-05 (+11 more)
+Nodes (20): Attribution, Daylight controls, Earlier validation — 2026-10-05 (source revision 7d48a1e), Fast Fourier Transform, Freecam and crest coverage, GodotOceanWaves, Introduction, Lighting Model (+12 more)
 
 ## Knowledge Gaps
-- **56 isolated node(s):** `Instance`, `Signaler`, `JoyAxisDeadZone`, `Scale`, `Visible` (+51 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 174 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **57 isolated node(s):** `Instance`, `Signaler`, `JoyAxisDeadZone`, `Scale`, `Visible` (+52 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 175 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `ImGuiGodot.Internal` connect `ImGuiGodot.Internal` to `ImGuiGD`, `Input`, `GodotImGuiWindow`, `IRenderer`, `CanvasRenderer`, `DummyRenderer`?**
-  _High betweenness centrality (0.321) - this node is a cross-community bridge._
+  _High betweenness centrality (0.320) - this node is a cross-community bridge._
 - **Why does `State` connect `State` to `ImGuiGodot.Internal`, `Input`, `Fonts`, `IRenderer`?**
-  _High betweenness centrality (0.215) - this node is a cross-community bridge._
-- **Why does `ImGuiGD` connect `ImGuiGD` to `ImGuiGodot.Internal`, `BackendNative`, `.Image`?**
+  _High betweenness centrality (0.214) - this node is a cross-community bridge._
+- **Why does `ImGuiGD` connect `ImGuiGD` to `ImGuiGodot.Internal`, `BackendNative`?**
   _High betweenness centrality (0.150) - this node is a cross-community bridge._
 - **What connects `Instance`, `Signaler`, `JoyAxisDeadZone` to the rest of the system?**
-  _56 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _57 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `ImGuiGD` be split into smaller, more focused modules?**
-  _Cohesion score 0.07386363636363637 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.06606606606606606 - nodes in this community are weakly interconnected._
 - **Should `imgui-godot.h` be split into smaller, more focused modules?**
   _Cohesion score 0.09659090909090909 - nodes in this community are weakly interconnected._
 - **Should `Input` be split into smaller, more focused modules?**
