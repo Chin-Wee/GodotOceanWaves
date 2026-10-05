@@ -5,7 +5,7 @@ extends RefCounted
 const PRESETS := [
 	{
 		'name': 'Daylight Ocean',
-		'description': 'Blue troughs, cyan crests and sparse whitecaps.',
+		'description': 'Blue troughs, cyan faces and foam-covered crest tops.',
 		'water_color': Color('#06495F'),
 		'foam_color': Color('#E9EFE5'),
 		'material': {
@@ -33,7 +33,7 @@ const PRESETS := [
 		'cascades': [
 			{'tile_length': Vector2(88, 88), 'displacement_scale': 1.0, 'choppiness': 1.25, 'normal_scale': 1.0,
 			 'wind_speed': 10.0, 'wind_direction': 20.0, 'fetch_length': 150.0,
-			 'swell': 0.8, 'spread': 0.2, 'detail': 1.0, 'whitecap': 0.35, 'foam_amount': 5.0, 'foam_crest_bias': 1.0},
+			 'swell': 0.8, 'spread': 0.2, 'detail': 1.0, 'whitecap': 0.5, 'foam_amount': 5.0, 'foam_crest_bias': 1.0},
 			{'tile_length': Vector2(57, 57), 'displacement_scale': 0.75, 'choppiness': 1.15, 'normal_scale': 1.0,
 			 'wind_speed': 5.0, 'wind_direction': 15.0, 'fetch_length': 150.0,
 			 'swell': 0.8, 'spread': 0.4, 'detail': 1.0, 'whitecap': 0.5, 'foam_amount': 0.0, 'foam_crest_bias': 0.0},

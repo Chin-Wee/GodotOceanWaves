@@ -59,11 +59,14 @@ void main() {
 
 			float jacobian = (1.0 + dhx_dx) * (1.0 + dhz_dz) - dhz_dx*dhz_dx;
 			float height = tile[0][id_local.y][id_local.x].y * sign_shift;
-			float crest = smoothstep(0.0, 1.5, max(height, 0.0));
+			float crest = smoothstep(0.25, 1.25, height);
 			float foam_factor = -min(0, jacobian - whitecap) * mix(1.0, crest, foam_crest_bias);
 			float foam = imageLoad(normal_map, id).a;
 			foam *= exp(-foam_decay_rate);
 			foam += foam_factor * foam_grow_rate;
+			// Sea of Thieves-style crest coverage, retaining the original accumulated foam trail.
+			float tip_coverage = crest * (1.0 - smoothstep(whitecap, whitecap + 0.3, jacobian));
+			if (foam_grow_rate > 0.0) foam = max(foam, tip_coverage * foam_crest_bias);
 			foam = clamp(foam, 0.0, 1.0);
 
 			vec2 gradient = vec2(dhy_dx, dhy_dz) / (1.0 + abs(vec2(dhx_dx, dhz_dz)));

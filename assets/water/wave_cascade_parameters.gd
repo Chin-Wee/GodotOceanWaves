@@ -35,7 +35,7 @@ signal scale_changed
 ## Modifies how steep a wave needs to be before foam can accumulate.
 @export_range(0, 2) var whitecap := 0.5 : # Note: 'Wispier' foam can be created by increasing the 'foam_amount' and decreasing the 'whitecap' parameters.
 	set(value): whitecap = value; should_generate_spectrum = true; _whitecap = [value]
-## Bias new foam toward elevated wave tips while retaining accumulated foam and decay.
+## Cover elevated, compressed wave tips and bias new foam toward them, retaining foam trails and decay.
 @export_range(0, 1) var foam_crest_bias := 0.0 :
 	set(value): foam_crest_bias = value; _foam_crest_bias = [value]
 

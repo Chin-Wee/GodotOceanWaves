@@ -11,10 +11,32 @@ func _save(name : String) -> Image:
 	for frame in 8: await process_frame
 	RenderingServer.force_draw()
 	var image := root.get_texture().get_image()
-	assert(image.get_size() == Vector2i(1920, 1080))
+	assert(image.get_size() == Vector2i(1920, 1080), str(image.get_size()))
 	assert(image.save_png(output.path_join(name + '.png')) == OK)
 	print('CAPTURE: ', name)
 	return image
+
+func _check_freecam_look(scene : Node3D, reference : Image) -> void:
+	var camera : Camera3D = scene.camera
+	var transform := camera.transform
+	var samples : Array = []
+	for y in range(650, 1000, 30):
+		for x in range(100, 1820, 30):
+			var pixel := Vector2i(x, y)
+			samples.append([pixel, camera.project_position(pixel, 100.0)])
+	camera.rotation += Vector3(deg_to_rad(-6), deg_to_rad(7), 0)
+	var changed : Image = await _save('daylight-foam-freecam-look')
+	var error := 0.0
+	var count := 0
+	for sample in samples:
+		var projected := Vector2i(camera.unproject_position(sample[1]).round())
+		if not Rect2i(Vector2i.ZERO, changed.get_size()).has_point(projected): continue
+		error += absf(reference.get_pixelv(sample[0]).r - changed.get_pixelv(projected).r)
+		count += 1
+	assert(count > 400)
+	assert(error/count < 0.025, 'Looking around must retain foam on the same world-space crests')
+	camera.transform = transform
+	print('PASS: freecam look reprojection, foam mean pixel error ', error/count)
 
 func _capture(scene : Node3D, matching_camera : Transform3D) -> void:
 	var water : MeshInstance3D = scene.water
@@ -43,14 +65,14 @@ func _capture(scene : Node3D, matching_camera : Transform3D) -> void:
 				var grading : bool = scene.get_node('Environment').environment.adjustment_enabled
 				scene.get_node('Environment').environment.adjustment_enabled = false
 				spray.visible = false
-				await _save(prefix + '-foam-' + str((step + 1)/50))
+				var mask : Image = await _save(prefix + '-foam-' + str((step + 1)/50))
+				if index == 1 and step + 1 == 200: await _check_freecam_look(scene, mask)
 				water.material_override.shader = shader
 				scene.get_node('Environment').environment.adjustment_enabled = grading
 				spray.visible = true
 		if index == 1:
 			scene.set_process(false)
-			root.get_node('ImGuiRoot').free() # Native controller listens to process_frame even when disabled.
-			Engine.time_scale = 0.0 # Freeze particle motion and TIME-based dissolve for lighting comparisons.
+			spray.visible = false # Isolate frozen water lighting from TIME-driven spray variation.
 			var lit_image : Image = await _save('daylight-light-control')
 			water.material_override.set_shader_parameter('crest_scattering_strength', 0.0)
 			var no_crest : Image = await _save('daylight-no-crest')
@@ -75,7 +97,6 @@ func _capture(scene : Node3D, matching_camera : Transform3D) -> void:
 			water.material_override.set_shader_parameter('crest_scattering_strength', 0.0)
 			var front_lit_no_crest : Image = await _save('daylight-front-lit-no-crest')
 			assert(front_lit.get_data() == front_lit_no_crest.get_data(), 'Crest contribution must vanish without backlighting')
-			Engine.time_scale = 1.0
 			print('PASS: rendered crest contribution, directional suppression and sunlight response')
 
 func _benchmark(scene : Node3D, matching_camera : Transform3D) -> void:
@@ -91,6 +112,8 @@ func _benchmark(scene : Node3D, matching_camera : Transform3D) -> void:
 		var frame_ms : Array[float] = []
 		var gpu_ms := 0.0
 		var cpu_ms := 0.0
+		var timestamp_updates := 0
+		var previous_timing := Vector2(-1, -1)
 		var start := Time.get_ticks_usec()
 		var previous := start
 		while Time.get_ticks_usec() - start < 10000000:
@@ -99,15 +122,20 @@ func _benchmark(scene : Node3D, matching_camera : Transform3D) -> void:
 			frame_ms.append((now - previous)/1000.0)
 			previous = now
 			frames += 1
-			gpu_ms += RenderingServer.viewport_get_measured_render_time_gpu(viewport_rid)
-			cpu_ms += RenderingServer.viewport_get_measured_render_time_cpu(viewport_rid)
+			var timing := Vector2(RenderingServer.viewport_get_measured_render_time_cpu(viewport_rid), RenderingServer.viewport_get_measured_render_time_gpu(viewport_rid))
+			if timing != previous_timing: timestamp_updates += 1
+			previous_timing = timing
+			cpu_ms += timing.x
+			gpu_ms += timing.y
 		frame_ms.sort()
 		var result := {
 			'preset': index, 'frames': frames, 'mean_frame_ms': (previous - start)/1000.0/frames,
 			'p95_frame_ms': frame_ms[int(frames*0.95)],
 			'viewport_cpu_ms': cpu_ms/frames, 'viewport_gpu_ms': gpu_ms/frames,
 			'draw_calls': Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME),
+			'render_timing_reliable': timestamp_updates > frames/2 and gpu_ms > 0.0,
 		}
+		if not result.render_timing_reliable: push_warning('Unavailable/stale GPU timings; keep the game window visible before comparing performance')
 		results.append(result)
 		print('TIMING: ', JSON.stringify(result))
 	var file := FileAccess.open(output.path_join('timings-' + RenderingServer.get_current_rendering_method() + '.json'), FileAccess.WRITE)
@@ -126,6 +154,8 @@ func _run() -> void:
 	for audio in ['OceanAudioPlayer', 'WindAudioPlayer']: scene.get_node(audio).autoplay = false
 	root.add_child(scene)
 	root.size = Vector2i(1920, 1080)
+	root.content_scale_size = Vector2i(1920, 1080)
+	root.content_scale_mode = Window.CONTENT_SCALE_MODE_VIEWPORT
 	root.always_on_top = true # Keep the test viewport visible while collecting GPU timings.
 	scene.camera.set_process(false)
 	var matching_camera : Transform3D = scene.camera.transform

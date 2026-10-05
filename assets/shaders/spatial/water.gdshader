@@ -31,7 +31,6 @@ varying float trough_visibility;
 
 void vertex() {
 	UV = VERTEX.xz;
-	float distance_factor = min(exp(-(length(VERTEX.xz - CAMERA_POSITION_WORLD.xz) - 150.0)*0.007), 1.0); // Displacement amonut falls off after 150m.
 
 	// Read displacements from displacement maps.
 	vec3 displacement = vec3(0);
@@ -39,7 +38,7 @@ void vertex() {
 		vec4 scales = map_scales[i];
 		displacement += texture(displacements, vec3(UV*scales.xy, float(i))).xyz * scales.z;
 	}
-	VERTEX += displacement * distance_factor;
+	VERTEX += displacement; // Keep world-space wave height independent of freecam position.
 	wave_height = displacement.y;
 }
 
@@ -76,7 +75,6 @@ vec4 texture_bicubic(in sampler2DArray sampler, in vec3 uvw) {
 
 void fragment() {
 	float map_size = float(textureSize(normals, 0).x);
-	float dist = length(VERTEX.xz);
 	// Read foam and normal information from normal maps.
 	vec3 gradient = vec3(0);
 	for (uint i = 0U; i < num_cascades; ++i) {
@@ -88,10 +86,10 @@ void fragment() {
 		gradient += mix(texture_bicubic(normals, coords), texture(normals, coords), min(1.0, ppm*0.1)).xyw * vec3(scales.ww, 1.0);
 	}
 		
-	foam_factor = smoothstep(0.0, 1.0, gradient.z*0.75) * exp(-dist*0.0075);
+	foam_factor = smoothstep(0.05, 0.8, gradient.z);
 	ALBEDO = max(mix(water_color.rgb, foam_color.rgb, foam_factor), vec3(1e-4));
 
-	gradient *= mix(0.015, normal_strength, exp(-dist*0.0175)); // Blend normal with terrain normal as distance increases.
+	gradient *= normal_strength;
 	NORMAL = (VIEW_MATRIX * vec4(normalize(vec3(-gradient.x, 1.0, -gradient.y)), 0.0)).xyz;
 
 	float sun_roughness = mix(clamp(roughness, 0.02, 1.0), 0.85, foam_factor);
@@ -140,5 +138,6 @@ void light() {
 	float crest_scatter = smoothstep(0.0, 2.5, max(wave_height, 0.0)) * sqrt(1.0 - dot_nv) * sqrt(sun_scatter) * crest_scattering_strength;
 	// Godot multiplies DIFFUSE_LIGHT by ALBEDO; cancel it here to keep cyan independent of the deep tint.
 	DIFFUSE_LIGHT += crest_color.rgb / max(ALBEDO, vec3(1e-4)) * crest_scatter * (1.0 - foam_factor) * (1.0 - fresnel) * ATTENUATION * LIGHT_COLOR;
-	DIFFUSE_LIGHT += mix((sss_height + sss_near) * sss_modifier / (1.0 + light_mask) + lambertian, foam_color.rgb, foam_factor) * trough_visibility * (1.0 - fresnel) * ATTENUATION * LIGHT_COLOR;
+	// Foam color is already in ALBEDO. LIGHT_COLOR includes PI; use Lambertian diffuse for foam.
+	DIFFUSE_LIGHT += mix((sss_height + sss_near) * sss_modifier / (1.0 + light_mask) + lambertian, vec3(dot_nl / PI), foam_factor) * trough_visibility * (1.0 - fresnel) * ATTENUATION * LIGHT_COLOR;
 }

@@ -128,6 +128,35 @@ func _run() -> void:
 	assert(_check_preset(scene, 1))
 	for frame in 12: await process_frame
 	print('PASS: Daylight startup; original FFT/mesh/cadence/particle settings preserved')
+	var generator : WaveGenerator = scene.water.wave_generator
+	var seeds_before : Array = []
+	for params in scene.water.parameters: seeds_before.append(params.spectrum_seed)
+	var time_before : float = scene.water.time
+	var wave_time_before : float = scene.water.parameters[0].time
+	scene.camera.enable_camera_movement = true
+	var press := InputEventKey.new()
+	press.physical_keycode = KEY_W
+	press.keycode = KEY_W
+	press.pressed = true
+	Input.parse_input_event(press)
+	Input.flush_buffered_events()
+	var position_before : Vector3 = scene.camera.position
+	scene.camera._process(0.1)
+	var release := press.duplicate()
+	release.pressed = false
+	Input.parse_input_event(release)
+	Input.flush_buffered_events()
+	assert(not scene.camera.position.is_equal_approx(position_before), 'Freecam WASD must remain active')
+	scene.camera.position += Vector3(180, 40, -90)
+	scene.camera.rotation += Vector3(-0.3, 0.5, 0)
+	for frame in 12: await process_frame
+	assert(scene.water.wave_generator == generator, 'Moving freecam must not recreate the wave field')
+	assert(scene.water.time > time_before and scene.water.parameters[0].time > wave_time_before)
+	for i in seeds_before.size(): assert(scene.water.parameters[i].spectrum_seed == seeds_before[i])
+	var code : String = scene.water.material_override.shader.code
+	assert(not code.contains('CAMERA_POSITION_WORLD') and not code.contains('length(VERTEX.xz)'))
+	assert(code.contains('VERTEX += displacement;') and code.contains('gradient *= normal_strength;'))
+	print('PASS: freecam movement; animated world-anchored waves retain generator and seeds')
 	scene.queue_free()
 	for frame in 3: await process_frame
 	quit()

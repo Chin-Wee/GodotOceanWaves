@@ -184,7 +184,7 @@ func _render_imgui() -> void:
 				ImGui.Dummy(Vector2(0,0)); ImGui.Separator(); ImGui.Dummy(Vector2(0,0))
 				imgui_text_tooltip('Whitecap:          ', 'Modifies how steep a wave needs to be before foam can accumulate.'); ImGui.SameLine(); if ImGui.SliderFloat('##white_cap', params._whitecap, 0, 2): params.whitecap = params._whitecap[0]
 				imgui_text_tooltip('Foam Amount:       ', ''); ImGui.SameLine(); if ImGui.SliderFloat('##foam_amount', params._foam_amount, 0, 10): params.foam_amount = params._foam_amount[0]
-				imgui_text_tooltip('Crest Foam Bias:   ', 'Bias new foam toward elevated, compressed wave tips. Accumulated foam still decays normally.'); ImGui.SameLine(); if ImGui.SliderFloat('##foam_crest_bias', params._foam_crest_bias, 0, 1): params.foam_crest_bias = params._foam_crest_bias[0]
+				imgui_text_tooltip('Crest Foam Bias:   ', 'Cover elevated, compressed wave tips with foam and bias new foam toward them. Accumulated foam still decays normally.'); ImGui.SameLine(); if ImGui.SliderFloat('##foam_crest_bias', params._foam_crest_bias, 0, 1): params.foam_crest_bias = params._foam_crest_bias[0]
 				ImGui.EndTabItem()
 		ImGui.EndTabBar()
 
