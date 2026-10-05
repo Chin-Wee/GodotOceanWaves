@@ -1,9 +1,15 @@
 @tool
 extends Node3D
 
+const SEA_PRESETS := preload('res://assets/water/sea_presets.gd')
+
+## Applied when running the scene. Runtime sliders can still override the preset.
+@export_enum('Scene Defaults', 'Calm Lagoon', 'Open Sea', 'Rough Seas', 'Storm') var sea_preset := 0
+
 var clipmap_tile_size := 1.0 # Not the smallest tile size, but one that reduces the amount of vertex jitter.
 var previous_tile := Vector3i.MAX
 var should_render_imgui := not Engine.is_editor_hint()
+var _scene_preset : Dictionary
 
 @onready var viewport : Variant = Engine.get_singleton(&'EditorInterface').get_editor_viewport_3d(0) if Engine.is_editor_hint() else get_viewport()
 @onready var camera : Variant = viewport.get_camera_3d()
@@ -14,7 +20,7 @@ var should_render_imgui := not Engine.is_editor_hint()
 @onready var _updates_per_second := [water.updates_per_second]
 @onready var _water_color := [water.water_color.r, water.water_color.g, water.water_color.b]
 @onready var _foam_color := [water.foam_color.r, water.foam_color.g, water.foam_color.b]
-@onready var _is_sea_spray_visible := [true]
+@onready var _is_sea_spray_visible := [$Water/WaterSprayEmitter.visible]
 
 func _init() -> void:
 	if Engine.is_editor_hint(): return
@@ -22,6 +28,67 @@ func _init() -> void:
 		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
 	DisplayServer.window_set_size(DisplayServer.screen_get_size() * 0.75)
 	DisplayServer.window_set_position(DisplayServer.screen_get_size() * 0.25 / 2.0)
+
+func _ready() -> void:
+	if Engine.is_editor_hint(): return
+	_scene_preset = _capture_scene_preset()
+	if sea_preset != 0: _apply_sea_preset(sea_preset)
+
+func _capture_scene_preset() -> Dictionary:
+	var snapshot := {
+		'water_color': water.water_color, 'foam_color': water.foam_color,
+		'material': {}, 'environment': {}, 'sun': {}, 'cascades': [],
+		'sky': $Environment.environment.sky,
+		'spray_visible': $Water/WaterSprayEmitter.visible,
+		'fog_volume_visible': $FogVolume.visible,
+	}
+	var reference : Dictionary = SEA_PRESETS.PRESETS[0]
+	for uniform in reference.material:
+		snapshot.material[uniform] = water.material_override.get_shader_parameter(uniform)
+	for property in reference.environment:
+		snapshot.environment[property] = $Environment.environment.get(property)
+	for property in reference.sun:
+		snapshot.sun[property] = $Sun.get(property)
+	for params in water.parameters:
+		snapshot.cascades.append(params.duplicate())
+	return snapshot
+
+func _apply_sea_preset(index : int) -> void:
+	if index < 0 or index > SEA_PRESETS.PRESETS.size(): return
+	var preset : Dictionary = _scene_preset if index == 0 else SEA_PRESETS.PRESETS[index - 1]
+	var cascades : Array[WaveCascadeParameters] = []
+	for definition in preset.cascades:
+		if definition is WaveCascadeParameters:
+			cascades.append(definition.duplicate())
+		else:
+			var params := WaveCascadeParameters.new()
+			for property in definition:
+				params.set(property, definition[property])
+			cascades.append(params)
+	water.parameters = cascades
+	water.water_color = preset.water_color
+	water.foam_color = preset.foam_color
+	for uniform in preset.material:
+		water.material_override.set_shader_parameter(uniform, preset.material[uniform])
+	for property in preset.environment:
+		$Environment.environment.set(property, preset.environment[property])
+	for property in preset.sun:
+		$Sun.set(property, preset.sun[property])
+	if preset.sky is Sky:
+		$Environment.environment.sky = preset.sky
+	else:
+		var sky : Sky = _scene_preset.sky.duplicate()
+		var material := ProceduralSkyMaterial.new()
+		for property in preset.sky:
+			material.set(property, preset.sky[property])
+		sky.sky_material = material
+		$Environment.environment.sky = sky
+	$Water/WaterSprayEmitter.visible = preset.spray_visible
+	$FogVolume.visible = preset.get('fog_volume_visible', false)
+	sea_preset = index
+	_water_color = [water.water_color.r, water.water_color.g, water.water_color.b]
+	_foam_color = [water.foam_color.r, water.foam_color.g, water.foam_color.b]
+	_is_sea_spray_visible[0] = preset.spray_visible
 
 func _process(delta : float) -> void:
 	if not Engine.is_editor_hint():
@@ -62,6 +129,14 @@ func _render_imgui() -> void:
 	ImGui.SetWindowPos(Vector2(20, 20))
 	ImGui.SeparatorText('OceanWaves')
 	ImGui.Text('FPS:                %d (%s)' % [fps, '%.2fms' % (1.0 / fps*1e3)])
+	imgui_text_tooltip('Sea Preset:        ', 'Re-select a preset to reset your manual tweaks.\nWave resolution, mesh quality and update rate are controlled separately.'); ImGui.SameLine()
+	var preset_name : String = 'Scene Defaults' if sea_preset == 0 else SEA_PRESETS.PRESETS[sea_preset - 1].name
+	if ImGui.BeginCombo('##sea_preset', preset_name):
+		for preset_index in range(SEA_PRESETS.PRESETS.size() + 1):
+			var label : String = 'Scene Defaults' if preset_index == 0 else SEA_PRESETS.PRESETS[preset_index - 1].name
+			if ImGui.Selectable(label): _apply_sea_preset(preset_index)
+		ImGui.EndCombo()
+	if sea_preset != 0: ImGui.Text(SEA_PRESETS.PRESETS[sea_preset - 1].description)
 	ImGui.Text('Enable Sea Spray:  '); ImGui.SameLine(); if ImGui.Checkbox('##sea_spray_checkbox', _is_sea_spray_visible): $Water/WaterSprayEmitter.visible = _is_sea_spray_visible[0]
 	imgui_text_tooltip('Wave Resolution:   ', 'The resolution of the displacement/normal maps used for each wave cascade.\nThis is also the FFT input size.'); ImGui.SameLine()
 	if ImGui.BeginCombo('##resolution', '%dx%d' % [water.map_size, water.map_size]):

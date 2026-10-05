@@ -3,6 +3,25 @@ An open ocean rendering experiment in the Godot Engine utilizing the inverse Fou
 
 [ocean_demo.mp4](https://github.com/user-attachments/assets/a8083878-a297-4536-a481-9123cea7e7df)
 
+## Sea presets
+
+Run the scene and use **Sea Preset** at the top of the OceanWaves panel:
+
+| Preset | Appearance |
+| --- | --- |
+| Calm Lagoon | Gentle swells, turquoise water, bright sky, no spray |
+| Open Sea | Long blue swells, crest foam, warm sunlight |
+| Rough Seas | Steeper green swells, more foam, overcast light |
+| Storm | Heavy swells, dense foam, dark sky and distance haze |
+
+Choose **Scene Defaults** to restore the waves, materials, sky, sun, fog and spray visibility loaded from your scene. The **Sea Preset** property on the Main node selects the initial preset when running. Runtime sliders remain editable; selecting a preset again restores its authored values.
+
+Preset values live in [assets/water/sea_presets.gd](assets/water/sea_presets.gd). They reuse the existing `WaveCascadeParameters` resources and FFT pipeline. All four presets use three cascades and preserve wave resolution, mesh quality, update rate and particle count, so performance controls can be tuned separately. Their skies use Godot's built-in `ProceduralSkyMaterial`, and their haze uses standard distance fog. The storm preset represents a sea state and lighting mood; it does not include rain, lightning or simulated clouds.
+
+The production reference is [Sea of Thieves' published water rendering work](https://history.siggraph.org/wp-content/uploads/2022/09/2018-Talks-Ang_The-Technical-Art-of-Sea-of-Thieves.pdf): FFT waves with art-directed colors and foam varied for calm, normal and stormy conditions. These presets are inspired by that approach, rather than copies of Rare's internal settings.
+
+To check preset switching, slider synchronization, scene restoration and startup selection, run `godot --path . --script res://checks/sea_presets.gd` with a RenderingDevice renderer. This check creates a small rendered scene; it needs a graphics device and does not use `--headless`.
+
 ## Introduction
 ### Why Fourier Transforms?
 A common approach for animating water in video games is by displacing vertices using *Gerstner waves*. While Gerstner waves work well for modeling the lower-frequency details in calmer waters, they fall short in accurately representing the choppy surfaces in an open ocean. To simulate the latter, a more complex approach simulates waves using the *inverse Fourier transform* of ocean-wave spectra modeled from empirical data gathered by oceanographers.
