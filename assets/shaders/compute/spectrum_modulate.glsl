@@ -26,6 +26,7 @@ layout(push_constant) restrict readonly uniform PushConstants {
 	float depth;
 	float time;
 	uint cascade_index;
+	float choppiness;
 };
 
 /** Returns exp(j*x) assuming x >= 0. */
@@ -69,17 +70,17 @@ void main() {
 	vec2 h_inv = vec2(-h.y, h.x); // Used to simplify complex multiplication operations
 
 	// --- WAVE DISPLACEMENT CALCULATION ---
-	vec2 hx = h_inv * k_unit.y;            // Equivalent: mul_complex(vec2(0, -k_unit.x), h);
+	vec2 hx = h_inv * k_unit.y * choppiness;            // Equivalent: mul_complex(vec2(0, -k_unit.x), h);
 	vec2 hy = h;
-	vec2 hz = h_inv * k_unit.x;            // Equivalent: mul_complex(vec2(0, -k_unit.z), h);
+	vec2 hz = h_inv * k_unit.x * choppiness;            // Equivalent: mul_complex(vec2(0, -k_unit.z), h);
 
 	// --- WAVE GRADIENT CALCULATION ---
 	// FIXME: i dont understand why k vectors need to be accessed yx instead of xy :(
 	vec2 dhy_dx = h_inv * k_vec.y;         // Equivalent: mul_complex(vec2(0, k_vec.x), h);
 	vec2 dhy_dz = h_inv * k_vec.x;         // Equivalent: mul_complex(vec2(0, k_vec.z), h);
-	vec2 dhx_dx = -h * k_vec.y * k_unit.y; // Equivalent: mul_complex(vec2(k_vec.x * k_unit.x, 0), -h);
-	vec2 dhz_dz = -h * k_vec.x * k_unit.x; // Equivalent: mul_complex(vec2(k_vec.y * k_unit.y, 0), -h);
-	vec2 dhz_dx = -h * k_vec.y * k_unit.x; // Equivalent: mul_complex(vec2(k_vec.x * k_unit.y, 0), -h);
+	vec2 dhx_dx = -h * k_vec.y * k_unit.y * choppiness; // Equivalent: mul_complex(vec2(k_vec.x * k_unit.x, 0), -h);
+	vec2 dhz_dz = -h * k_vec.x * k_unit.x * choppiness; // Equivalent: mul_complex(vec2(k_vec.y * k_unit.y, 0), -h);
+	vec2 dhz_dx = -h * k_vec.y * k_unit.x * choppiness; // Equivalent: mul_complex(vec2(k_vec.x * k_unit.y, 0), -h);
 
 	// Because h repsects the complex conjugation property (i.e., the output of IFFT will be a
 	// real signal), we can pack two waves into one.

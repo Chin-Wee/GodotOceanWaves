@@ -8,6 +8,10 @@ signal scale_changed
 	set(value): tile_length = value; should_generate_spectrum = true; _tile_length = [value.x, value.y]; scale_changed.emit()
 @export_range(0, 2) var displacement_scale := 1.0 : # Note: This should be reduced as the number of cascades increases to avoid *too* much detail!
 	set(value): displacement_scale = value; _displacement_scale = [displacement_scale]; scale_changed.emit()
+## Horizontal FFT displacement: larger values sharpen crests without increasing wave height.
+@export_range(0, 2) var choppiness := 1.0 :
+	set(value): choppiness = value; _choppiness = [value]
+
 @export_range(0, 2) var normal_scale := 1.0 : # Note: This should be reduced as the number of cascades increases to avoid *too* much detail!
 	set(value): normal_scale = value; _normal_scale = [normal_scale]; scale_changed.emit()
 
@@ -31,6 +35,10 @@ signal scale_changed
 ## Modifies how steep a wave needs to be before foam can accumulate.
 @export_range(0, 2) var whitecap := 0.5 : # Note: 'Wispier' foam can be created by increasing the 'foam_amount' and decreasing the 'whitecap' parameters.
 	set(value): whitecap = value; should_generate_spectrum = true; _whitecap = [value]
+## Bias new foam toward elevated wave tips while retaining accumulated foam and decay.
+@export_range(0, 1) var foam_crest_bias := 0.0 :
+	set(value): foam_crest_bias = value; _foam_crest_bias = [value]
+
 @export_range(0, 10) var foam_amount := 5.0 :
 	set(value): foam_amount = value; should_generate_spectrum = true; _foam_amount = [value]
 
@@ -45,6 +53,8 @@ var foam_decay_rate : float
 # reflect these values unless manually synced!
 var _tile_length := [tile_length.x, tile_length.y]
 var _displacement_scale := [displacement_scale]
+var _choppiness := [choppiness]
+var _foam_crest_bias := [foam_crest_bias]
 var _normal_scale := [normal_scale]
 var _wind_speed := [wind_speed]
 var _wind_direction := [deg_to_rad(wind_direction)]

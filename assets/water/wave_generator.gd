@@ -71,7 +71,7 @@ func _update(compute_list : int, cascade_index : int, parameters : Array[WaveCas
 		var omega := JONSWAP_peak_angular_frequency(params.wind_speed, params.fetch_length*1e3)
 		pipelines[&'spectrum_compute'].call(context, compute_list, RenderingContext.create_push_constant([params.spectrum_seed.x, params.spectrum_seed.y, params.tile_length.x, params.tile_length.y, alpha, omega, params.wind_speed, deg_to_rad(params.wind_direction), DEPTH, params.swell, params.detail, params.spread, cascade_index]))
 		params.should_generate_spectrum = false
-	pipelines[&'spectrum_modulate'].call(context, compute_list, RenderingContext.create_push_constant([params.tile_length.x, params.tile_length.y, DEPTH, params.time, cascade_index]))
+	pipelines[&'spectrum_modulate'].call(context, compute_list, RenderingContext.create_push_constant([params.tile_length.x, params.tile_length.y, DEPTH, params.time, cascade_index, params.choppiness]))
 
 	## --- WAVE SPECTRA INVERSE FOURIER TRANSFORM ---
 	var fft_push_constant := RenderingContext.create_push_constant([cascade_index])
@@ -83,7 +83,7 @@ func _update(compute_list : int, cascade_index : int, parameters : Array[WaveCas
 	pipelines[&'fft_compute'].call(context, compute_list, fft_push_constant)
 
 	## --- DISPLACEMENT/NORMAL MAP UPDATE ---
-	pipelines[&'fft_unpack'].call(context, compute_list, RenderingContext.create_push_constant([cascade_index, params.whitecap, params.foam_grow_rate, params.foam_decay_rate]))
+	pipelines[&'fft_unpack'].call(context, compute_list, RenderingContext.create_push_constant([cascade_index, params.whitecap, params.foam_grow_rate, params.foam_decay_rate, params.foam_crest_bias]))
 
 ## Begins updating wave cascades based on the provided parameters. To balance stutter,
 ## the generator will schedule one cascade update per frame. All cascades from the

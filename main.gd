@@ -4,7 +4,7 @@ extends Node3D
 const SEA_PRESETS := preload('res://assets/water/sea_presets.gd')
 
 ## Applied when running the scene. Runtime sliders can still override the preset.
-@export_enum('Scene Defaults', 'Calm Lagoon', 'Open Sea', 'Rough Seas', 'Storm') var sea_preset := 0
+@export_enum('Scene Defaults', 'Daylight Ocean') var sea_preset := 1
 
 var clipmap_tile_size := 1.0 # Not the smallest tile size, but one that reduces the amount of vertex jitter.
 var previous_tile := Vector3i.MAX
@@ -32,13 +32,14 @@ func _init() -> void:
 func _ready() -> void:
 	if Engine.is_editor_hint(): return
 	_scene_preset = _capture_scene_preset()
-	if sea_preset != 0: _apply_sea_preset(sea_preset)
+	_apply_sea_preset(sea_preset if sea_preset in [0, 1] else 0)
 
 func _capture_scene_preset() -> Dictionary:
 	var snapshot := {
 		'water_color': water.water_color, 'foam_color': water.foam_color,
 		'material': {}, 'environment': {}, 'sun': {}, 'cascades': [],
-		'sky': $Environment.environment.sky,
+		'sky': $Environment.environment.sky.duplicate(true),
+		'camera': {'transform': camera.transform, 'fov': camera.fov},
 		'spray_visible': $Water/WaterSprayEmitter.visible,
 		'fog_volume_visible': $FogVolume.visible,
 	}
@@ -65,6 +66,9 @@ func _apply_sea_preset(index : int) -> void:
 			for property in definition:
 				params.set(property, definition[property])
 			cascades.append(params)
+	water.rng.seed = 1234
+	water.time = 0.0
+	water.next_update_time = 0.0
 	water.parameters = cascades
 	water.water_color = preset.water_color
 	water.foam_color = preset.foam_color
@@ -74,15 +78,13 @@ func _apply_sea_preset(index : int) -> void:
 		$Environment.environment.set(property, preset.environment[property])
 	for property in preset.sun:
 		$Sun.set(property, preset.sun[property])
-	if preset.sky is Sky:
-		$Environment.environment.sky = preset.sky
-	else:
-		var sky : Sky = _scene_preset.sky.duplicate()
-		var material := ProceduralSkyMaterial.new()
-		for property in preset.sky:
-			material.set(property, preset.sky[property])
-		sky.sky_material = material
-		$Environment.environment.sky = sky
+	$Environment.environment.sky = preset.sky.duplicate(true)
+	camera.transform = _scene_preset.camera.transform
+	camera.fov = preset.camera.fov
+	if index != 0:
+		camera.position.y = preset.camera.height
+		camera.rotation.x = deg_to_rad(preset.camera.pitch_degrees)
+	_camera_fov[0] = camera.fov
 	$Water/WaterSprayEmitter.visible = preset.spray_visible
 	$FogVolume.visible = preset.get('fog_volume_visible', false)
 	sea_preset = index
@@ -170,6 +172,7 @@ func _render_imgui() -> void:
 			if ImGui.BeginTabItem('Cascade %d' % (i + 1)):
 				imgui_text_tooltip('Tile Length:       ', 'Denotes the distance the cascade\'s tile should cover (in meters).'); ImGui.SameLine(); if ImGui.InputFloat2('##tile_length', params._tile_length): params.tile_length = Vector2(params._tile_length[0], params._tile_length[1])
 				imgui_text_tooltip('Displacement Scale:', ''); ImGui.SameLine(); if ImGui.SliderFloat('##displacement_scale', params._displacement_scale, 0, 2): params.displacement_scale = params._displacement_scale[0]
+				imgui_text_tooltip('Choppiness:        ', 'Horizontal FFT displacement. Higher values sharpen wave crests without increasing height.'); ImGui.SameLine(); if ImGui.SliderFloat('##choppiness', params._choppiness, 0, 2): params.choppiness = params._choppiness[0]
 				imgui_text_tooltip('Normal Scale:      ', ''); ImGui.SameLine(); if ImGui.SliderFloat('##normal_scale', params._normal_scale, 0, 2): params.normal_scale = params._normal_scale[0]
 				ImGui.Dummy(Vector2(0,0)); ImGui.Separator(); ImGui.Dummy(Vector2(0,0))
 				imgui_text_tooltip('Wind Speed:        ', 'Denotes the average wind speed above the water (in meters per second).\nIncreasing makes waves steeper and more \'chaotic\'.'); ImGui.SameLine(); if ImGui.DragFloat('##wind_speed', params._wind_speed): params.wind_speed = params._wind_speed[0]
@@ -181,6 +184,7 @@ func _render_imgui() -> void:
 				ImGui.Dummy(Vector2(0,0)); ImGui.Separator(); ImGui.Dummy(Vector2(0,0))
 				imgui_text_tooltip('Whitecap:          ', 'Modifies how steep a wave needs to be before foam can accumulate.'); ImGui.SameLine(); if ImGui.SliderFloat('##white_cap', params._whitecap, 0, 2): params.whitecap = params._whitecap[0]
 				imgui_text_tooltip('Foam Amount:       ', ''); ImGui.SameLine(); if ImGui.SliderFloat('##foam_amount', params._foam_amount, 0, 10): params.foam_amount = params._foam_amount[0]
+				imgui_text_tooltip('Crest Foam Bias:   ', 'Bias new foam toward elevated, compressed wave tips. Accumulated foam still decays normally.'); ImGui.SameLine(); if ImGui.SliderFloat('##foam_crest_bias', params._foam_crest_bias, 0, 1): params.foam_crest_bias = params._foam_crest_bias[0]
 				ImGui.EndTabItem()
 		ImGui.EndTabBar()
 

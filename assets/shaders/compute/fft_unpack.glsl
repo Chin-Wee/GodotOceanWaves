@@ -22,6 +22,7 @@ layout(push_constant) restrict readonly uniform PushConstants {
 	float whitecap;
 	float foam_grow_rate;
 	float foam_decay_rate;
+	float foam_crest_bias;
 };
 
 // Tiling doesn't provide much of a benefit here (but it does a *little*)
@@ -57,7 +58,9 @@ void main() {
 			float dhz_dx = tile[3][id_local.y][id_local.x].y * sign_shift;
 
 			float jacobian = (1.0 + dhx_dx) * (1.0 + dhz_dz) - dhz_dx*dhz_dx;
-			float foam_factor = -min(0, jacobian - whitecap);
+			float height = tile[0][id_local.y][id_local.x].y * sign_shift;
+			float crest = smoothstep(0.0, 1.5, max(height, 0.0));
+			float foam_factor = -min(0, jacobian - whitecap) * mix(1.0, crest, foam_crest_bias);
 			float foam = imageLoad(normal_map, id).a;
 			foam *= exp(-foam_decay_rate);
 			foam += foam_factor * foam_grow_rate;

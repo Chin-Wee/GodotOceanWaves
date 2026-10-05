@@ -1,0 +1,9 @@
+[gd_resource type="Sky" load_steps=3 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sky_daylight.jpg" id="1_sky"]
+
+[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_daylight"]
+panorama = ExtResource("1_sky")
+
+[resource]
+sky_material = SubResource("PanoramaSkyMaterial_daylight")

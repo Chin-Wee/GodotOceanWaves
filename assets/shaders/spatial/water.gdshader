@@ -11,7 +11,11 @@ render_mode world_vertex_coords, shadows_disabled;
 global uniform vec4 water_color : source_color;
 global uniform vec4 foam_color : source_color;
 
-uniform float roughness : hint_range(0.0, 1.0) = 0.4;
+uniform float roughness : hint_range(0.0, 1.0) = 0.4; // Direct sun highlights.
+uniform float reflection_roughness : hint_range(0.0, 1.0) = 0.4; // Sky reflections.
+uniform vec4 crest_color : source_color = vec4(0.219608, 0.729412, 0.760784, 1.0);
+uniform float crest_scattering_strength : hint_range(0.0, 2.0) = 0.0;
+uniform float trough_light_strength : hint_range(0.0, 1.0) = 1.0; // Art-directed trough occlusion.
 uniform float normal_strength : hint_range(0.0, 1.0) = 1.0; // Global normal strength
 
 group_uniforms cascade_data;
@@ -23,6 +27,7 @@ global uniform sampler2DArray normals : hint_normal; // Each layer represents on
 varying float wave_height;
 varying float foam_factor;
 varying float fresnel;
+varying float trough_visibility;
 
 void vertex() {
 	UV = VERTEX.xz;
@@ -84,17 +89,21 @@ void fragment() {
 	}
 		
 	foam_factor = smoothstep(0.0, 1.0, gradient.z*0.75) * exp(-dist*0.0075);
-	ALBEDO = mix(water_color.rgb, foam_color.rgb, foam_factor);
+	ALBEDO = max(mix(water_color.rgb, foam_color.rgb, foam_factor), vec3(1e-4));
 
 	gradient *= mix(0.015, normal_strength, exp(-dist*0.0175)); // Blend normal with terrain normal as distance increases.
 	NORMAL = (VIEW_MATRIX * vec4(normalize(vec3(-gradient.x, 1.0, -gradient.y)), 0.0)).xyz;
 
-	fresnel = mix(pow(1.0 - dot(VIEW, NORMAL), 5.0*exp(-2.69*roughness)) / (1.0 + 22.7*pow(roughness, 1.5)), 1.0, REFLECTANCE);
-	ROUGHNESS = (1.0 - fresnel) * foam_factor + 0.4; // Roughness is proportional to foam/fog amount and fresnel.
+	float sun_roughness = mix(clamp(roughness, 0.02, 1.0), 0.85, foam_factor);
+	float dot_nv = clamp(dot(VIEW, NORMAL), 0.0, 1.0);
+	fresnel = mix(pow(1.0 - dot_nv, 5.0*exp(-2.69*sun_roughness)) / (1.0 + 22.7*pow(sun_roughness, 1.5)), 1.0, REFLECTANCE);
+	ROUGHNESS = mix(clamp(reflection_roughness, 0.02, 1.0), 0.85, foam_factor);
+	trough_visibility = mix(clamp(trough_light_strength, 0.0, 1.0), 1.0, smoothstep(-1.5, 0.75, wave_height));
+	AO = trough_visibility; // Native ambient occlusion; the cyan transmitted light remains independent.
 }
 
 float smith_masking_shadowing(in float cos_theta, in float alpha) {
-	float a = cos_theta / (alpha * sqrt(1.0 - cos_theta*cos_theta)); // Approximate: 1.0 / (alpha * tan(acos(cos_theta)))
+	float a = cos_theta / (alpha * sqrt(max(1.0 - cos_theta*cos_theta, 1e-8))); // Approximate: 1.0 / (alpha * tan(acos(cos_theta)))
 	float a_sq = a*a;
 	return a < 1.6 ? (1.0 - 1.259*a + 0.396*a_sq) / (3.535*a + 2.181*a_sq) : 0.0;
 }
@@ -107,21 +116,29 @@ float ggx_distribution(in float cos_theta, in float alpha) {
 }
 
 void light() {
-	vec3 halfway = normalize(LIGHT + VIEW);
-	float dot_nl = max(dot(NORMAL, LIGHT), 2e-5);
-	float dot_nv = max(dot(NORMAL, VIEW), 2e-5);
+	vec3 halfway = (LIGHT + VIEW) / max(length(LIGHT + VIEW), 1e-4);
+	float dot_nl = clamp(dot(NORMAL, LIGHT), 2e-5, 1.0);
+	float dot_nv = clamp(dot(NORMAL, VIEW), 2e-5, 1.0);
+	float sun_roughness = mix(clamp(roughness, 0.02, 1.0), 0.85, foam_factor);
 
 	// --- SPECULAR ---
-	float light_mask = smith_masking_shadowing(roughness, dot_nv);
-	float view_mask = smith_masking_shadowing(roughness, dot_nl);
-	float microfacet_distribution = ggx_distribution(dot(NORMAL, halfway), roughness);
+	float alpha = max(sun_roughness*sun_roughness, 0.002); // Perceptual roughness to GGX width, as in Godot's built-in model.
+	float light_mask = smith_masking_shadowing(dot_nl, alpha);
+	float view_mask = smith_masking_shadowing(dot_nv, alpha);
+	float microfacet_distribution = ggx_distribution(clamp(dot(NORMAL, halfway), 0.0, 1.0), alpha);
+	float sun_fresnel = mix(REFLECTANCE, 1.0, pow(1.0 - clamp(dot(VIEW, halfway), 0.0, 1.0), 5.0));
 	float geometric_attenuation = 1.0 / (1.0 + light_mask + view_mask);
-	SPECULAR_LIGHT += fresnel * microfacet_distribution * geometric_attenuation / (4.0 * dot_nv + 0.1) * ATTENUATION;
+	SPECULAR_LIGHT += sun_fresnel * microfacet_distribution * geometric_attenuation / (4.0 * dot_nv + 0.1) * ATTENUATION * LIGHT_COLOR;
 
 	// --- DIFFUSE ---
 	const vec3 sss_modifier = vec3(0.9,1.15,0.85); // Subsurface scattering produces a 'greener' color.
-	float sss_height = 1.0*max(0.0, wave_height + 2.5) * pow(max(dot(LIGHT, -VIEW), 0.0), 4.0) * pow(0.5 - 0.5 * dot(LIGHT, NORMAL), 3.0);
+	float sun_scatter = pow(clamp(dot(LIGHT, -VIEW), 0.0, 1.0), 4.0) * pow(clamp(0.5 - 0.5 * dot(LIGHT, NORMAL), 0.0, 1.0), 3.0);
+	float sss_height = max(0.0, wave_height + 2.5) * sun_scatter;
 	float sss_near = 0.5*pow(dot_nv, 2.0);
 	float lambertian = 0.5*dot_nl;
-	DIFFUSE_LIGHT += mix((sss_height + sss_near) * sss_modifier / (1.0 + light_mask) + lambertian, foam_color.rgb, foam_factor) * (1.0 - fresnel) * ATTENUATION * LIGHT_COLOR;
+	// Sea of Thieves: art-direct the light transmitted through elevated, backlit crests.
+	float crest_scatter = smoothstep(0.0, 2.5, max(wave_height, 0.0)) * sqrt(1.0 - dot_nv) * sqrt(sun_scatter) * crest_scattering_strength;
+	// Godot multiplies DIFFUSE_LIGHT by ALBEDO; cancel it here to keep cyan independent of the deep tint.
+	DIFFUSE_LIGHT += crest_color.rgb / max(ALBEDO, vec3(1e-4)) * crest_scatter * (1.0 - foam_factor) * (1.0 - fresnel) * ATTENUATION * LIGHT_COLOR;
+	DIFFUSE_LIGHT += mix((sss_height + sss_near) * sss_modifier / (1.0 + light_mask) + lambertian, foam_color.rgb, foam_factor) * trough_visibility * (1.0 - fresnel) * ATTENUATION * LIGHT_COLOR;
 }

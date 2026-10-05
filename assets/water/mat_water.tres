@@ -6,5 +6,9 @@
 render_priority = 1
 shader = ExtResource("1_uffek")
 shader_parameter/roughness = 0.65
+shader_parameter/reflection_roughness = 0.4
+shader_parameter/crest_color = Color(0.219608, 0.729412, 0.760784, 1)
+shader_parameter/crest_scattering_strength = 0.0
+shader_parameter/trough_light_strength = 1.0
 shader_parameter/normal_strength = 1.0
 shader_parameter/map_scales = PackedVector4Array(0.0113636, 0.0113636, 1, 1, 0.0175439, 0.0175439, 0.75, 1, 0.0625, 0.0625, 0, 0.25)

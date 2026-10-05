@@ -7,11 +7,13 @@ func _initialize() -> void:
 
 func _make_scene(initial_preset := 0) -> Node3D:
 	var scene : Node3D = load('res://main.tscn').instantiate()
-	scene.sea_preset = initial_preset
+	if initial_preset >= 0: scene.sea_preset = initial_preset
 	scene.get_node('Water').map_size = 128
 	scene.get_node('Water').mesh_quality = 0
 	scene.get_node('Water').updates_per_second = 30.0
 	scene.get_node('Water/WaterSprayEmitter').amount = 256
+	scene.get_node('Water/WaterSprayEmitter').process_material.set_shader_parameter('num_particles', 256)
+	for audio in ['OceanAudioPlayer', 'WindAudioPlayer']: scene.get_node(audio).autoplay = false
 	root.add_child(scene)
 	return scene
 
@@ -29,6 +31,8 @@ func _check_preset(scene : Node3D, index : int) -> bool:
 			assert(water.parameters[i].get(property) == preset.cascades[i][property], property)
 		assert(is_equal_approx(water.parameters[i]._wind_direction[0], deg_to_rad(water.parameters[i].wind_direction)))
 		assert(water.parameters[i]._tile_length == [water.parameters[i].tile_length.x, water.parameters[i].tile_length.y])
+		assert(water.parameters[i]._choppiness == [water.parameters[i].choppiness])
+		assert(water.parameters[i]._foam_crest_bias == [water.parameters[i].foam_crest_bias])
 	assert(water.water_color == preset.water_color)
 	assert(water.foam_color == preset.foam_color)
 	assert(scene._water_color == [preset.water_color.r, preset.water_color.g, preset.water_color.b])
@@ -36,7 +40,7 @@ func _check_preset(scene : Node3D, index : int) -> bool:
 	assert(scene._is_sea_spray_visible[0] == preset.spray_visible)
 	assert(scene.get_node('Water/WaterSprayEmitter').visible == preset.spray_visible)
 	for uniform in preset.material:
-		assert(is_equal_approx(water.material_override.get_shader_parameter(uniform), preset.material[uniform]))
+		assert(_matches(water.material_override.get_shader_parameter(uniform), preset.material[uniform]))
 	for property in preset.environment:
 		assert(_matches(scene.get_node('Environment').environment.get(property), preset.environment[property]), property)
 	for property in preset.sun:
@@ -44,8 +48,15 @@ func _check_preset(scene : Node3D, index : int) -> bool:
 			assert(scene.get_node('Sun').rotation_degrees.is_equal_approx(preset.sun[property]))
 		else:
 			assert(_matches(scene.get_node('Sun').get(property), preset.sun[property]), property)
-	for property in preset.sky:
-		assert(_matches(scene.get_node('Environment').environment.sky.sky_material.get(property), preset.sky[property]), property)
+	assert(scene.get_node('Environment').environment.sky.sky_material.panorama == preset.sky.sky_material.panorama)
+	assert(scene.get_node('Environment').environment.sky.sky_material.energy_multiplier == preset.sky.sky_material.energy_multiplier)
+	assert(preset.sky.sky_material is PanoramaSkyMaterial)
+	assert(preset.sky.sky_material.panorama.get_width() == 4096)
+	assert(is_equal_approx(scene.camera.position.y, preset.camera.height))
+	assert(is_equal_approx(scene.camera.rotation.x, deg_to_rad(preset.camera.pitch_degrees)))
+	assert(is_equal_approx(scene.camera.rotation.y, scene._scene_preset.camera.transform.basis.get_euler().y))
+	assert(is_equal_approx(scene.camera.fov, preset.camera.fov))
+	assert(scene._camera_fov[0] == scene.camera.fov)
 	assert(water.map_size == 128 and water.mesh_quality == 0 and water.updates_per_second == 30.0)
 	assert(scene.get_node('Water/WaterSprayEmitter').amount == 256)
 	assert(not scene.get_node('FogVolume').visible)
@@ -54,21 +65,42 @@ func _check_preset(scene : Node3D, index : int) -> bool:
 func _check_restoration(scene : Node3D) -> bool:
 	# Restore after manual tweaks; the original snapshot must remain independent.
 	scene.water.parameters[0].wind_speed = 100.0
+	scene.water.parameters[0].choppiness = 0.0
+	scene.water.parameters[0].foam_crest_bias = 0.5
 	scene.water.water_color = Color.RED
+	scene.water.foam_color = Color.BLACK
+	scene.camera.position = Vector3(40, 50, 60)
+	scene.camera.rotation = Vector3.ZERO
+	scene.camera.fov = 100.0
+	for uniform in scene._scene_preset.material:
+		scene.water.material_override.set_shader_parameter(uniform, Color.RED if scene._scene_preset.material[uniform] is Color else 0.9)
+	scene.get_node('Environment').environment.sky.sky_material.energy_multiplier = 4.0
+	scene.get_node('Environment').environment.fog_depth_end = 50.0
+	scene.get_node('Sun').light_energy = 3.0
+	scene.get_node('Sun').rotation = Vector3.ZERO
+	scene.get_node('Water/WaterSprayEmitter').visible = false
+	scene.get_node('FogVolume').visible = false
 	scene._apply_sea_preset(0)
 	for i in scene._scene_preset.cascades.size():
 		for property in scene.SEA_PRESETS.PRESETS[0].cascades[0]:
 			assert(scene.water.parameters[i].get(property) == scene._scene_preset.cascades[i].get(property), property)
 	assert(scene.water.water_color == scene._scene_preset.water_color)
 	assert(scene.water.foam_color == scene._scene_preset.foam_color)
-	assert(scene.get_node('Environment').environment.sky == scene._scene_preset.sky)
+	assert(scene.get_node('Environment').environment.sky.sky_material.panorama == scene._scene_preset.sky.sky_material.panorama)
+	assert(scene.get_node('Environment').environment.sky.sky_material.energy_multiplier == scene._scene_preset.sky.sky_material.energy_multiplier)
 	for property in scene._scene_preset.environment:
 		assert(_matches(scene.get_node('Environment').environment.get(property), scene._scene_preset.environment[property]), property)
 	assert(scene.get_node('FogVolume').visible == scene._scene_preset.fog_volume_visible)
-	scene._apply_sea_preset(-1)
-	assert(scene.sea_preset == 0)
+	assert(scene.camera.transform.is_equal_approx(scene._scene_preset.camera.transform))
+	assert(scene.camera.fov == scene._scene_preset.camera.fov)
+	assert(scene._camera_fov[0] == scene.camera.fov)
+	assert(scene._water_color == [scene.water.water_color.r, scene.water.water_color.g, scene.water.water_color.b])
+	assert(scene._foam_color == [scene.water.foam_color.r, scene.water.foam_color.g, scene.water.foam_color.b])
+	for invalid in [-1, 2]:
+		scene._apply_sea_preset(invalid)
+		assert(scene.sea_preset == 0)
 	for uniform in scene._scene_preset.material:
-		assert(is_equal_approx(scene.water.material_override.get_shader_parameter(uniform), scene._scene_preset.material[uniform]))
+		assert(_matches(scene.water.material_override.get_shader_parameter(uniform), scene._scene_preset.material[uniform]))
 	for property in scene._scene_preset.sun:
 		assert(_matches(scene.get_node('Sun').get(property), scene._scene_preset.sun[property]), property)
 	assert(scene.get_node('Water/WaterSprayEmitter').visible == scene._scene_preset.spray_visible)
@@ -76,26 +108,26 @@ func _check_restoration(scene : Node3D) -> bool:
 
 func _run() -> void:
 	var scene := _make_scene()
-	for index in range(1, scene.SEA_PRESETS.PRESETS.size() + 1):
-		scene._apply_sea_preset(index)
-		if not _check_preset(scene, index):
-			quit(1)
-			return
+	var seeds : Array = []
+	for params in scene.water.parameters: seeds.append(params.spectrum_seed)
+	for repetition in 3:
+		scene._apply_sea_preset(1)
+		assert(_check_preset(scene, 1))
+		for i in seeds.size():
+			assert(scene.water.parameters[i].spectrum_seed == seeds[i])
+			assert(is_equal_approx(scene.water.parameters[i].time, 120.0 + PI*i))
+		assert(scene.water.time == 0.0 and scene.water.next_update_time == 0.0)
 		for frame in 12: await process_frame
-		print('PASS: ', scene.SEA_PRESETS.PRESETS[index - 1].name)
-	if not _check_restoration(scene):
-		quit(1)
-		return
-	print('PASS: Scene Defaults restores original values after edits')
+		assert(_check_restoration(scene))
+		for i in seeds.size(): assert(scene.water.parameters[i].spectrum_seed == seeds[i])
+		for frame in 12: await process_frame
+	print('PASS: repeated Daylight switching, seeded waves, colors, camera and full restoration; invalid selections ignored')
 	scene.queue_free()
 	for frame in 3: await process_frame
-
-	scene = _make_scene(4)
-	if not _check_preset(scene, 4):
-		quit(1)
-		return
+	scene = _make_scene(-1)
+	assert(_check_preset(scene, 1))
 	for frame in 12: await process_frame
-	print('PASS: Inspector-selected startup preset')
+	print('PASS: Daylight startup; original FFT/mesh/cadence/particle settings preserved')
 	scene.queue_free()
 	for frame in 3: await process_frame
 	quit()

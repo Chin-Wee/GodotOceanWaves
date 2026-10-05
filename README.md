@@ -9,18 +9,66 @@ Run the scene and use **Sea Preset** at the top of the OceanWaves panel:
 
 | Preset | Appearance |
 | --- | --- |
-| Calm Lagoon | Gentle swells, turquoise water, bright sky, no spray |
-| Open Sea | Long blue swells, crest foam, warm sunlight |
-| Rough Seas | Steeper green swells, more foam, overcast light |
-| Storm | Heavy swells, dense foam, dark sky and distance haze |
+| Scene Defaults | Original authored waves, palette, evening panorama, camera and fog |
+| Daylight Ocean | Original wave detail, blue troughs, directional cyan crests, glossy glints and reduced crest foam |
 
-Choose **Scene Defaults** to restore the waves, materials, sky, sun, fog and spray visibility loaded from your scene. The **Sea Preset** property on the Main node selects the initial preset when running. Runtime sliders remain editable; selecting a preset again restores its authored values.
+**Daylight Ocean loads at startup.** The **Sea Preset** property on Main selects the initial preset. Runtime sliders remain editable; selecting either preset again resets its colors, material, camera, sky, sun, fog, spray visibility and cascade parameters. Scene Defaults restores the settings captured from your scene before the startup preset was applied. Both selections reset the existing generator to seed **1234** and the original cascade time offsets.
 
-Preset values live in [assets/water/sea_presets.gd](assets/water/sea_presets.gd). They reuse the existing `WaveCascadeParameters` resources and FFT pipeline. All four presets use three cascades and preserve wave resolution, mesh quality, update rate and particle count, so performance controls can be tuned separately. Their skies use Godot's built-in `ProceduralSkyMaterial`, and their haze uses standard distance fog. The storm preset represents a sea state and lighting mood; it does not include rain, lightning or simulated clouds.
+Preset values live in [assets/water/sea_presets.gd](assets/water/sea_presets.gd). This replaces the four experimental presets using the same capture/restoration code. FFT resolution, mesh quality, update cadence and particle count stay unchanged. Daylight retains the original **88 / 57 / 16 m** cascades, **1 / 1 / 0.25** cascade normal scales and **1.0** detail in every cascade. Primary whitecap/foam change to **0.35 / 5**; both smaller cascades have zero foam growth. Temporal foam accumulation, exponential decay and crest-driven spray are retained. Following the requested sharper tips, horizontal FFT choppiness is **1.25 / 1.15 / 1** (the third cascade supplies normals only), while vertical displacement scales stay **1 / 0.75 / 0**. Primary crest foam bias is **1.0**: new foam requires both compression and positive crest height, so troughs do not seed fresh foam.
 
-The production reference is [Sea of Thieves' published water rendering work](https://history.siggraph.org/wp-content/uploads/2022/09/2018-Talks-Ang_The-Technical-Art-of-Sea-of-Thieves.pdf): FFT waves with art-directed colors and foam varied for calm, normal and stormy conditions. These presets are inspired by that approach, rather than copies of Rare's internal settings.
+The production reference is [Rare's Sea of Thieves water rendering](https://history.siggraph.org/wp-content/uploads/2022/09/2018-Talks-Ang_The-Technical-Art-of-Sea-of-Thieves.pdf): FFT geometry with art-directed scattering colors and crest foam. This pass keeps the existing opaque surface and Atlas scattering approximation. It adds no foam textures or rendering passes.
 
-To check preset switching, slider synchronization, scene restoration and startup selection, run `godot --path . --script res://checks/sea_presets.gd` with a RenderingDevice renderer. This check creates a small rendered scene; it needs a graphics device and does not use `--headless`.
+### Daylight controls
+
+Select **Water → Material Override → Shader Parameters** in the Inspector:
+
+| Control | Daylight value | Effect |
+| --- | --- | --- |
+| Roughness | 0.25 | Direct sun highlight width |
+| Reflection Roughness | 0.20 | Sky reflection blur |
+| Crest Color | `#38BAC2` | Independent cyan light through elevated, backlit crests |
+| Crest Scattering Strength | 0.65 | Crest light intensity; zero disables it |
+| Normal Strength | 1.0 | Fine surface detail |
+| Trough Light Strength | 0.4 | Minimum diffuse/ambient light in deep troughs; cyan transmitted light remains separate |
+
+Foam blends both roughness controls toward **0.85**. Angle inputs and effective roughness are bounded to avoid singularities. Smith masking arguments are corrected, and direct highlights now follow Godot's `LIGHT_COLOR` (including sunlight color and energy). Render checks also identified broad white highlights from using the surface viewing angle for direct Fresnel; direct highlights now use the light half-vector and perceptual roughness conversion (`alpha = roughness²`), following Godot's built-in GGX model. Those correctness fixes apply to Scene Defaults too.
+
+The Water node exposes deep-water (`#06495F`) and foam (`#E9EFE5`) colors. Cascade Resources and the existing runtime cascade tabs contain choppiness, whitecap, foam amount and crest foam bias. Trough darkness uses native ambient occlusion plus a height-based diffuse-light approximation; it adds no shadow pass. The original filtered normal construction is retained; sharper tips come from horizontal FFT displacement. Daylight camera height is **2.5 m**, pitch **12° down**, FOV **75°**, with the authored yaw retained.
+
+The native PanoramaSkyMaterial uses Kloofendal Partly Cloudy's tonemapped JPG, imported with a **4096 px** size limit, mipmaps and VRAM compression. The sun's **47.4° elevation / −37.6° yaw** follows the inspected panorama sun core in Godot's equirectangular mapping. Sun energy is **1.0**, with neutral warm color, mild grading and pale blue depth haze from **200–800 m**. Kloofendal's rounded clouds and blue sky matched the reference better than inspected Kloppenheim 03 and Sunflowers alternatives.
+
+### Preset validation
+
+Use Godot 4.7 with a graphics device; these checks require a RenderingDevice renderer and cannot run with `--headless`:
+
+```sh
+godot --path . --script res://checks/sea_presets.gd --audio-driver Dummy
+godot --path . --script res://checks/sea_presets.gd --audio-driver Dummy --rendering-method mobile
+# A/B timings: same 1920×1080 camera, full original quality, four 10-second samples.
+godot --path . --script res://checks/daylight_render.gd --audio-driver Dummy --disable-vsync
+godot --path . --script res://checks/daylight_render.gd --audio-driver Dummy --disable-vsync --rendering-method mobile
+# Fixed 50 Hz simulation: compare 4/6/8-second phases and diagnostic foam/light images.
+godot --path . --script res://checks/daylight_render.gd --audio-driver Dummy --disable-vsync --max-fps 60 -- --capture
+```
+
+The switch check covers repeated selection, deterministic seeds, manual edits, camera/material/sky restoration, color-slider synchronization and invalid indices. Capture mode matches camera, seed, simulation time, FFT resolution, mesh quality, update cadence and particle count. Output is in the printed `user://daylight-validation` folder. Timings report wall-clock frame mean/P95 separately from measured viewport CPU/GPU time. A zero GPU timestamp means unavailable measurement; viewport time does not include every external FFT compute operation. The check temporarily keeps its window above other windows to avoid occluded-window timing samples. Keep other GPU workloads closed for comparisons. On this Godot/Metal build, readback fences and GPU timestamps can fail; `--rendering-driver vulkan` provides an alternative when validating on macOS. Mobile renderer results on a desktop do not establish phone performance; measure the target device before setting production budgets.
+
+### Measured validation — 2026-10-05
+
+Godot **4.7.stable.official.5b4e0cb0f**, Apple **M5**, Vulkan/MoltenVK, **1920×1080**. Both presets used the Daylight camera, seed 1234, 1024² FFT, High mesh, 50 Hz and 32,768 particles. Two 10-second samples per preset, with 4-second warmups and reversed second-pair order; means below are weighted by frame count.
+
+| Renderer | Preset | Whole-frame mean | Frame P95 range | Viewport GPU mean |
+| --- | --- | --- | --- | --- |
+| Forward+ | Scene Defaults | 7.64 ms | 8.50–16.52 ms | 3.06 ms |
+| Forward+ | Daylight Ocean | 7.71 ms | 16.24–16.94 ms | 2.72 ms |
+| Mobile | Scene Defaults | 8.34 ms | 9.23–9.30 ms | 1.58 ms |
+| Mobile | Daylight Ocean | 8.59 ms | 9.17–11.77 ms | 1.70 ms |
+
+Draw calls stayed at **3**. Whole-frame samples include simulation, rendering and desktop presentation variability; viewport GPU timestamps exclude external FFT compute work. These desktop samples do not demonstrate a phone budget or a reliable speedup. Native Metal smoke checks passed, but its GPU timestamps were unavailable and capture fence errors required Vulkan for the comparable measurements.
+
+Matched captures at **4 / 6 / 8 seconds** show blue troughs, cyan elevated faces, fine glints and broken crest ribbons. Diagnostic foam coverage in the fixed ocean rectangle (rows 450–1079, full width; display-space mask > 0.25) changed from **65.33 / 33.15 / 42.54%** to **24.87 / 1.82 / 0.86%**: about **80% less average visible coverage**. This is a screen-space comparison, not a physical foam-area measurement. New foam is gated by positive primary-cascade height and compression; existing foam can linger while decaying.
+
+Forward+ and Mobile captures passed directional crest-light suppression, sunlight energy/color response and minimum-roughness/grazing checks. Repeated switching, restoration after manual edits, color synchronization, seeded resets and invalid selections passed in both renderers. Mobile warns about the original scene's volumetric fog while loading Scene Defaults; Daylight uses supported depth haze. Scattering and trough darkness remain art-directed approximations on opaque FFT water.
 
 ## Introduction
 ### Why Fourier Transforms?
@@ -117,5 +165,6 @@ The displacement, normal, and foam maps generated after running FFT on our direc
 **Pensionerov, Ivan**. **[FFT-Ocean](https://github.com/gasgiant/FFT-Ocean)**. GitHub. (2020).
 
 ## Attribution
+**[Kloofendal 48d Partly Cloudy (Pure Sky)](https://polyhaven.com/a/kloofendal_48d_partly_cloudy_puresky)** by **Greg Zaal** (original) and **Jarod Guest** (sky edits), from Poly Haven, is used under **[CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/)**. The source is the tonemapped JPG; the Godot import is limited to 4096 px.\
 **[Evening Road 01 (Pure Sky)](https://polyhaven.com/a/evening_road_01_puresky)** by **Jarod Guest** is used under the [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) license.\
 **[OTFFT DIT Stockham Algorithm](http://wwwa.pikara.ne.jp/okojisan/otfft-en/stockham3.html)** by **Takuya Okahisa** is used and modified under the [MIT](http://wwwa.pikara.ne.jp/okojisan/otfft-en/download.html) license.
