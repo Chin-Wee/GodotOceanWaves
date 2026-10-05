@@ -144,9 +144,9 @@
     "semantic_hash": "6bfdcadf89f57a678eb525c2959172ef"
   },
   "README.md": {
-    "mtime": 1791178763.6591299,
-    "seen": 1791178778.196573,
-    "ast_hash": "1369172e82c9b9aab6b22c2e7728c234",
+    "mtime": 1791194943.2733996,
+    "seen": 1791195030.778591,
+    "ast_hash": "c4486e909f7beb9648cf0c28fcaf7db1",
     "semantic_hash": ""
   },
   "addons/imgui-godot/include/imgui-version.txt": {
@@ -171,6 +171,12 @@
     "mtime": 1791121060.704845,
     "seen": 1791122679.538045,
     "ast_hash": "43b305bd3d55f8faec5e5175cbe35533",
+    "semantic_hash": ""
+  },
+  "assets/sky_daylight.jpg": {
+    "mtime": 1791194943.409757,
+    "seen": 1791195030.778594,
+    "ast_hash": "3f2b19fa9c14943b34e5d4f480ba13ba",
     "semantic_hash": ""
   }
 }

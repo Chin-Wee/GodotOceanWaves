@@ -1,17 +1,17 @@
 # Graph Report - GodotOceanWaves  (2026-10-05)
 
 ## Corpus Check
-- 23 files · ~256,964 words
+- 23 files · ~856,971 words
 - Verdict: corpus is large enough that graph structure adds value.
-- Unclassified: 73 file(s) not represented in the graph (top: .import 14, .uid 14, .gd 12)
+- Unclassified: 78 file(s) not represented in the graph (top: .uid 16, .import 15, .gd 13)
 
 ## Summary
-- 385 nodes · 541 edges · 18 communities
-- Extraction: 96% EXTRACTED · 4% INFERRED · 0% AMBIGUOUS · INFERRED: 19 edges (avg confidence: 0.83)
+- 388 nodes · 544 edges · 18 communities
+- Extraction: 97% EXTRACTED · 3% INFERRED · 0% AMBIGUOUS · INFERRED: 19 edges (avg confidence: 0.83)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `9bd48628`
+- Built from commit: `7d48a1e3`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -133,24 +133,24 @@ Cohesion: 0.25
 Nodes (3): Rid, DummyRenderer, Name
 
 ### Community 17 - "GodotOceanWaves"
-Cohesion: 0.12
-Nodes (16): Attribution, Fast Fourier Transform, GodotOceanWaves, Introduction, Lighting Model, Load Balancing, Ocean-Wave Spectra, References (+8 more)
+Cohesion: 0.10
+Nodes (19): Attribution, Daylight controls, Fast Fourier Transform, GodotOceanWaves, Introduction, Lighting Model, Load Balancing, Measured validation — 2026-10-05 (+11 more)
 
 ## Knowledge Gaps
-- **54 isolated node(s):** `Instance`, `Signaler`, `JoyAxisDeadZone`, `Scale`, `Visible` (+49 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 172 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **56 isolated node(s):** `Instance`, `Signaler`, `JoyAxisDeadZone`, `Scale`, `Visible` (+51 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 174 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `ImGuiGodot.Internal` connect `ImGuiGodot.Internal` to `ImGuiGD`, `Input`, `GodotImGuiWindow`, `IRenderer`, `CanvasRenderer`, `DummyRenderer`?**
-  _High betweenness centrality (0.326) - this node is a cross-community bridge._
+  _High betweenness centrality (0.321) - this node is a cross-community bridge._
 - **Why does `State` connect `State` to `ImGuiGodot.Internal`, `Input`, `Fonts`, `IRenderer`?**
-  _High betweenness centrality (0.218) - this node is a cross-community bridge._
+  _High betweenness centrality (0.215) - this node is a cross-community bridge._
 - **Why does `ImGuiGD` connect `ImGuiGD` to `ImGuiGodot.Internal`, `BackendNative`, `.Image`?**
-  _High betweenness centrality (0.153) - this node is a cross-community bridge._
+  _High betweenness centrality (0.150) - this node is a cross-community bridge._
 - **What connects `Instance`, `Signaler`, `JoyAxisDeadZone` to the rest of the system?**
-  _54 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _56 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `ImGuiGD` be split into smaller, more focused modules?**
   _Cohesion score 0.07386363636363637 - nodes in this community are weakly interconnected._
 - **Should `imgui-godot.h` be split into smaller, more focused modules?**
