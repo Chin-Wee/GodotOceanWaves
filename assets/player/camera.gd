@@ -13,7 +13,13 @@ extends Camera3D
 var enable_camera_movement := true
 
 func _input(event):
-	if not current or not enable_camera_movement:
+	if not current:
+		return
+	# Always release freelook, including when the pointer finishes over the panel.
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and not event.pressed:
+		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+		return
+	if not enable_camera_movement:
 		return
 
 	if Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
@@ -32,7 +38,7 @@ func _input(event):
 				_velocity = clamp(_velocity / speed_scale, min_speed, max_speed)
 
 func _process(delta):
-	if not current:
+	if not current or not enable_camera_movement:
 		return
 
 	var direction = Vector3(

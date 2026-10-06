@@ -37,6 +37,10 @@ The Water node exposes deep-water (`#06495F`) and foam (`#E9EFE5`) colors. Casca
 
 ### Freecam and crest coverage
 
+In Godot's embedded Game view, select **Input** beside **2D / 3D** to edit the runtime panel. Embedded play uses the plugin's existing viewport-local input backend, so panel clicks remain aligned when the editor resizes or moves the game view. Freecam movement pauses while the panel captures mouse or keyboard input. Releasing RMB always restores the cursor, including over the panel.
+
+Run `Godot --path . --script res://checks/panel_input.gd` to check panel clicks, slider editing and freecam input capture on the native renderer.
+
 **RMB** looks around; **WASD** moves, **Q/E** descends/ascends, **Shift** boosts speed and the mouse wheel changes speed. Waves keep animating. The existing world-coordinate FFT sampling and camera-following clipmap are retained. Camera-driven attenuation of displacement, normal strength and foam has been removed: moving or pitching the camera no longer changes those wave-field values. Perspective, reflections and highlights still respond to the view. The mesh retains its existing coarse outer rings.
 
 Daylight's primary **Whitecap 0.5 / Foam Amount 5 / Crest Foam Bias 1** gives compressed crest tops immediate foam coverage, in addition to the original accumulating/decaying trails. Coverage ramps over primary wave heights **0.25–1.25 m**, with compression controlling where the cap forms. Foam reaches full surface coverage instead of being capped at 0.84 and faded away with camera distance. The other two cascades still have zero foam growth. Foam lighting now uses Lambertian diffuse with the tint applied once through ALBEDO, so stronger coverage retains shading. No rendering passes, texture samples, mesh subdivisions or particles were added. Far-water detail is no longer attenuated; test aliasing and frame budgets on the intended camera/device. Scene Defaults keeps crest bias zero; the camera-independent surface and lighting fixes apply to both choices.
