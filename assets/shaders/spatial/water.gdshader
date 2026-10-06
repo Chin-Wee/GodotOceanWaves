@@ -171,7 +171,7 @@ float ggx_distribution(in float cos_theta, in float alpha) {
 }
 
 void light() {
-	if (camera_underwater > 0.5 && dot(VIEW, NORMAL) < 0.0) return;
+	if (!(camera_underwater > 0.5 && dot(VIEW, NORMAL) < 0.0)) {
 	vec3 sun_direction = normalize(LIGHT);
 	vec3 reflection_direction = normalize(reflect(-VIEW, NORMAL));
 	float sun_cos_angle = clamp(dot(sun_direction, reflection_direction), -1.0, 1.0);
@@ -210,4 +210,5 @@ void light() {
 	// Foam color is already in ALBEDO. LIGHT_COLOR includes PI; use Lambertian diffuse for foam.
 	float sss_peak = peak_mask * sun_scatter * crest_scattering_strength;
 	DIFFUSE_LIGHT += mix((sss_peak + sss_near) * sss_modifier / (1.0 + light_mask) + lambertian, vec3(dot_nl / PI), foam_factor) * trough_visibility * (1.0 - fresnel) * ATTENUATION * LIGHT_COLOR;
+	}
 }

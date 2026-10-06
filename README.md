@@ -5,18 +5,18 @@ An open ocean rendering experiment in the Godot Engine utilizing the inverse Fou
 
 ## Sea presets
 
-Run the scene and use **Sea Preset** at the top of the OceanWaves panel:
+Run the scene and use **Sea Preset** and **Sea State** at the top of the OceanWaves panel:
 
 | Preset | Appearance |
 | --- | --- |
 | Scene Defaults | Original authored waves, palette, evening panorama, camera and fog |
-| Daylight Ocean | Original wave detail, blue troughs, directional cyan crests, glossy glints and covered crest tops |
+| Daylight Ocean | Blue troughs, cyan crests, area-sun glints and sparse breaking foam |
 
-**Daylight Ocean loads at startup.** The **Sea Preset** property on Main selects the initial preset. Runtime sliders remain editable; selecting either preset again resets its colors, material, camera, sky, sun, fog, spray visibility and cascade parameters. Scene Defaults restores the settings captured from your scene before the startup preset was applied. Both selections reset the existing generator to seed **1234** and the original cascade time offsets.
+**Daylight Ocean loads at startup.** The **Sea Preset** property selects the scene look; **Sea State** independently selects Calm, Normal or Storm wave and foam tuning. Re-selecting a preset resets its colors, material, camera, sky, sun, fog, spray and cascade values. Scene Defaults restores the settings captured before the startup preset. Preset changes reset the generator to seed **1234** and the original cascade time offsets.
 
-Preset values live in [assets/water/sea_presets.gd](assets/water/sea_presets.gd). This replaces the four experimental presets using the same capture/restoration code. FFT resolution, mesh quality, update cadence and particle count stay unchanged. Daylight retains the original **88 / 57 / 16 m** cascades, **1 / 1 / 0.25** cascade normal scales and **1.0** detail in every cascade. Primary whitecap/foam are **0.5 / 5**; both smaller cascades have zero foam growth. Temporal foam accumulation, exponential decay and crest-driven spray are retained. Following the requested sharper tips, horizontal FFT choppiness is **1.25 / 1.15 / 1** (the third cascade supplies normals only), while vertical displacement scales stay **1 / 0.75 / 0**. Primary crest foam bias is **1.0**: elevated, compressed tips receive immediate coverage, while new accumulated foam is height-biased. Troughs do not seed fresh foam.
+Preset values live in [assets/water/sea_presets.gd](assets/water/sea_presets.gd). FFT resolution, mesh quality, update cadence and particle count stay unchanged. Daylight keeps the **88 / 57 / 16 m** cascades, **1 / 1 / 0.25** normal scales, and **1.25 / 1.15 / 1** choppiness. Foam is injected only by the FFT displacement Jacobian into a dedicated ping-pong texture array: R holds persistent foam and G holds fresh breaking. Feedback progressively blurs and decays R; fresh G drives spray. The shader blends the inspected `sea_spray.png` mask for fresh foam into seamless FastNoiseLite noise for aged foam.
 
-The production reference is [Rare's Sea of Thieves water rendering](https://history.siggraph.org/wp-content/uploads/2022/09/2018-Talks-Ang_The-Technical-Art-of-Sea-of-Thieves.pdf): FFT geometry with art-directed scattering colors and crest foam. This pass keeps the existing opaque surface and Atlas scattering approximation. It adds no foam textures or rendering passes.
+The production reference is [Rare's Sea of Thieves water rendering](https://history.siggraph.org/wp-content/uploads/2022/09/2018-Talks-Ang_The-Technical-Art-of-Sea-of-Thieves.pdf): FFT geometry, choppiness-driven peak scattering, camera-centered depth contacts, feedback-blurred foam and an area-sun highlight. This project keeps the existing opaque FFT surface and art-directed scattering model.
 
 ### Daylight controls
 
@@ -33,7 +33,7 @@ Select **Water → Material Override → Shader Parameters** in the Inspector:
 
 Foam blends both roughness controls toward **0.85**. Angle inputs and effective roughness are bounded to avoid singularities. Smith masking arguments are corrected, and direct highlights now follow Godot's `LIGHT_COLOR` (including sunlight color and energy). Render checks also identified broad white highlights from using the surface viewing angle for direct Fresnel; direct highlights now use the light half-vector and perceptual roughness conversion (`alpha = roughness²`), following Godot's built-in GGX model. Those correctness fixes apply to Scene Defaults too.
 
-The Water node exposes deep-water (`#06495F`) and foam (`#E9EFE5`) colors. Cascade Resources and the existing runtime cascade tabs contain choppiness, whitecap, foam amount and crest foam bias. Trough darkness uses native ambient occlusion plus a height-based diffuse-light approximation; it adds no shadow pass. The original filtered normal construction is retained; sharper tips come from horizontal FFT displacement. Daylight camera height is **2.5 m**, pitch **12° down**, FOV **75°**, with the authored yaw retained.
+The Water node exposes deep-water (`#06495F`) and foam (`#E9EFE5`) colors. Cascade Resources and runtime tabs contain choppiness, Jacobian threshold, foam amount, decay and dispersion. Calm suppresses open-ocean injection; interaction foam remains independent. Storm raises wave amplitude and choppiness while increasing foam injection and spread. Daylight camera height is **2.5 m**, pitch **12° down**, FOV **75°**, with the authored yaw retained.
 
 ### Embedded panel input
 
@@ -41,11 +41,11 @@ In Godot's embedded Game view, select **Input** beside **2D / 3D** to edit the r
 
 Run `Godot --path . --script res://checks/panel_input.gd` to check panel clicks, slider editing and freecam input capture on the native renderer.
 
-### Freecam and crest coverage
+### Freecam, foam and reflections
 
 **RMB** looks around; **WASD** moves, **Q/E** descends/ascends, **Shift** boosts speed and the mouse wheel changes speed. Waves keep animating. The existing world-coordinate FFT sampling and camera-following clipmap are retained. Camera-driven attenuation of displacement, normal strength and foam has been removed: moving or pitching the camera no longer changes those wave-field values. Perspective, reflections and highlights still respond to the view. The mesh retains its existing coarse outer rings.
 
-Daylight's primary **Whitecap 0.5 / Foam Amount 5 / Crest Foam Bias 1** gives compressed crest tops immediate foam coverage, in addition to the original accumulating/decaying trails. Coverage ramps over primary wave heights **0.25–1.25 m**, with compression controlling where the cap forms. Foam reaches full surface coverage instead of being capped at 0.84 and faded away with camera distance. The other two cascades still have zero foam growth. Foam lighting now uses Lambertian diffuse with the tint applied once through ALBEDO, so stronger coverage retains shading. No rendering passes, texture samples, mesh subdivisions or particles were added. Far-water detail is no longer attenuated; test aliasing and frame budgets on the intended camera/device. Scene Defaults keeps crest bias zero; the camera-independent surface and lighting fixes apply to both choices.
+The three sea states scale vertical wave amplitude and horizontal choppiness, then tune Jacobian threshold, injection, decay, dispersion and texture age blend. Peak scattering uses a normalized horizontal-displacement mask stored in the displacement alpha channel. A camera-centered top-down depth pass writes a separate interaction-foam history in world-plane UVs; advection, blur and half-life decay preserve trails as the camera moves. A planar SubViewport supplies above-water reflection and the view used for the underwater Snell cone; absorption and fog tint the refracted result. Sea spray reads only fresh foam from G.
 
 The existing checks now exercise physical-key freecam movement while simulation continues, preserving generator identity and seeds. Capture mode rotates the view over frozen FFT data and reprojects the same world-space rays; the Forward+ foam comparison had mean display-space error **0.0024**, below the 0.025 tolerance for pixel rounding/filtering. Test output is fixed at 1920×1080 internally even if the OS clamps the native window size.
 
@@ -53,10 +53,14 @@ The native PanoramaSkyMaterial uses Kloofendal Partly Cloudy's tonemapped JPG, i
 
 ### Preset validation
 
-Use Godot 4.7 with a graphics device; these checks require a RenderingDevice renderer and cannot run with `--headless`:
+Use Godot 4.7. The GPU scene checks need a RenderingDevice renderer; the foam contract, water look and Snell math checks can run with `--headless`:
 
 ```sh
+godot --headless --path . --script res://checks/foam_contract.gd
+godot --headless --path . --script res://checks/water_look.gd
+godot --headless --path . --script res://checks/reflection_underwater.gd
 godot --path . --script res://checks/sea_presets.gd --audio-driver Dummy
+godot --path . --script res://checks/interaction_foam.gd --audio-driver Dummy
 godot --path . --script res://checks/sea_presets.gd --audio-driver Dummy --rendering-method mobile
 # A/B timings: same 1920×1080 camera, full original quality, four 10-second samples.
 godot --path . --script res://checks/daylight_render.gd --audio-driver Dummy --disable-vsync
@@ -69,7 +73,7 @@ The switch check covers repeated selection, deterministic seeds, manual edits, c
 
 ### Earlier validation — 2026-10-05 (source revision 7d48a1e)
 
-These timings and foam percentages describe the earlier sparse-foam revision, before the crest-coverage/freecam changes above.
+These timings and foam percentages describe an earlier sparse-foam revision and do not measure the current feedback, reflection or interaction passes.
 
 Godot **4.7.stable.official.5b4e0cb0f**, Apple **M5**, Vulkan/MoltenVK, **1920×1080**. Both presets used the Daylight camera, seed 1234, 1024² FFT, High mesh, 50 Hz and 32,768 particles. Two 10-second samples per preset, with 4-second warmups and reversed second-pair order; means below are weighted by frame count.
 
@@ -82,7 +86,7 @@ Godot **4.7.stable.official.5b4e0cb0f**, Apple **M5**, Vulkan/MoltenVK, **1920×
 
 Draw calls stayed at **3**. Whole-frame samples include simulation, rendering and desktop presentation variability; viewport GPU timestamps exclude external FFT compute work. These desktop samples do not demonstrate a phone budget or a reliable speedup. Native Metal smoke checks passed, but its GPU timestamps were unavailable and capture fence errors required Vulkan for the comparable measurements.
 
-The earlier sparse-foam revision's matched captures at **4 / 6 / 8 seconds** show blue troughs, cyan elevated faces, fine glints and broken crest ribbons. Diagnostic foam coverage in the fixed ocean rectangle (rows 450–1079, full width; display-space mask > 0.25) changed from **65.33 / 33.15 / 42.54%** to **24.87 / 1.82 / 0.86%**: about **80% less average visible coverage**. This is a screen-space comparison, not a physical foam-area measurement. New foam is gated by positive primary-cascade height and compression; existing foam can linger while decaying.
+The earlier sparse-foam revision's matched captures at **4 / 6 / 8 seconds** show blue troughs, cyan elevated faces, fine glints and broken crest ribbons. Diagnostic foam coverage in the fixed ocean rectangle (rows 450–1079, full width; display-space mask > 0.25) changed from **65.33 / 33.15 / 42.54%** to **24.87 / 1.82 / 0.86%**: about **80% less average visible coverage**. This is a screen-space comparison from that older revision, not a physical foam-area measurement or current baseline.
 
 Forward+ and Mobile captures passed directional crest-light suppression, sunlight energy/color response and minimum-roughness/grazing checks. Repeated switching, restoration after manual edits, color synchronization, seeded resets and invalid selections passed in both renderers. Mobile warns about the original scene's volumetric fog while loading Scene Defaults; Daylight uses supported depth haze. Scattering and trough darkness remain art-directed approximations on opaque FFT water.
 
@@ -102,12 +106,12 @@ The ocean lighting model largely follows the BSDF described in the 'Atlas' GDC t
 The normal/foam map is sampled with a mix between bicubic and bilinear filtering depending on the world-space pixel density (a value dependent on the normal map texture resolution and texture UV tiling size). This effectively reduces texture aliasing artifacts at lower surface resolutions while maintaining the detail at higher surface resolutions.
 
 #### Sea Foam
-Tessendorf notes a method for determining when to generate sea foam by checking where the waves' peaks curl into themselves (i.e., when the Jacobian of the displacement is negative). Foam accumulates linearly and dissipates exponentially on a texture over multiple wave updates, and are controlled by "foam grow rate" and "foam decay rate" parameters respectively.
+Fresh open-ocean foam is thresholded from the FFT displacement Jacobian. A separate RG feedback array stores total foam and fresh injection; each update blurs and decays the total channel while the fresh channel decays faster. The surface shader switches from high-frequency `sea_spray.png` breakup to a seamless low-frequency noise mask as the fresh fraction falls. Interaction foam uses its own camera-centered depth source and reprojected, advected, blurred history.
 
 #### Sea Spray
-Sea spray is modeled using particles via Godot's GPUParticles3D node and makes heavy use of a custom particle shader. Particles are distributed evenly across the plane within the GPUParticles3D node's bounding box. Then, they are culled based on the foam amount present at their position. Un-culled particles begin their lifecycle at a random offset.
+Sea spray is modeled using particles via Godot's GPUParticles3D node and makes heavy use of a custom particle shader. Particles are distributed evenly across the plane within the GPUParticles3D node's bounding box. The particle shader culls them using the fresh-breaking G channel at their start position. Un-culled particles begin their lifecycle at a random offset.
 
-Each sea spray particle uses a billboarded sprite with a single static texture. Over the course of their lifecycle, particles' scales and displacements are modified to emulate a splash's appearance. A dissolve effect in particles' mesh shader fades the sprite in a way that simulates how sea spray atomizes once in the air.
+Each sea spray particle uses a billboarded sprite with a static texture. Spawn eligibility samples only fresh foam from the G channel. Over the particle lifecycle, scale and displacement emulate a splash; a dissolve shader fades the sprite as it atomizes.
 
 One *major* drawback of this method is that a large increase in particle amount only results in a small increase in sea spray density. This is due to the equal distribution of particles along the bounding box, which results in a majority of the added particles being culled.
 

@@ -5,11 +5,13 @@ const SEA_PRESETS := preload('res://assets/water/sea_presets.gd')
 
 ## Applied when running the scene. Runtime sliders can still override the preset.
 @export_enum('Scene Defaults', 'Daylight Ocean') var sea_preset := 1
+@export_enum('Calm', 'Normal', 'Storm') var sea_state := 1
 
 var clipmap_tile_size := 1.0 # Not the smallest tile size, but one that reduces the amount of vertex jitter.
 var previous_tile := Vector3i.MAX
 var should_render_imgui := not Engine.is_editor_hint()
 var _scene_preset : Dictionary
+var _sea_state_baseline: Array[Dictionary] = []
 
 @onready var viewport : Variant = Engine.get_singleton(&'EditorInterface').get_editor_viewport_3d(0) if Engine.is_editor_hint() else get_viewport()
 @onready var camera : Variant = viewport.get_camera_3d()
@@ -89,9 +91,38 @@ func _apply_sea_preset(index : int) -> void:
 	$Water/WaterSprayEmitter.visible = preset.spray_visible
 	$FogVolume.visible = preset.get('fog_volume_visible', false)
 	sea_preset = index
+	_capture_sea_state_baseline()
+	_apply_sea_state(sea_state)
 	_water_color = [water.water_color.r, water.water_color.g, water.water_color.b]
 	_foam_color = [water.foam_color.r, water.foam_color.g, water.foam_color.b]
 	_is_sea_spray_visible[0] = preset.spray_visible
+
+func _capture_sea_state_baseline() -> void:
+	_sea_state_baseline.clear()
+	for params: WaveCascadeParameters in water.parameters:
+		_sea_state_baseline.append({
+			'displacement_scale': params.displacement_scale,
+			'choppiness': params.choppiness,
+			'foam_amount': params.foam_amount,
+			'whitecap': params.whitecap,
+		})
+
+func _apply_sea_state(index: int) -> void:
+	if index < 0 or index >= SEA_PRESETS.SEA_STATES.size(): return
+	sea_state = index
+	var state: Dictionary = SEA_PRESETS.SEA_STATES[index]
+	var normal: Dictionary = SEA_PRESETS.SEA_STATES[1]
+	var foam_scale: float = state.foam_amount / maxf(normal.foam_amount, 0.001)
+	for i in mini(water.parameters.size(), _sea_state_baseline.size()):
+		var params: WaveCascadeParameters = water.parameters[i]
+		var baseline: Dictionary = _sea_state_baseline[i]
+		params.displacement_scale = baseline.displacement_scale * state.wave_amplitude_scale
+		params.choppiness = baseline.choppiness * state.choppiness_scale
+		params.foam_amount = baseline.foam_amount * foam_scale
+		params.whitecap = clampf(baseline.whitecap + state.whitecap - normal.whitecap, 0.0, 2.0)
+		params.foam_decay = state.foam_decay
+		params.foam_dispersion = state.foam_dispersion
+	water.material_override.set_shader_parameter('foam_texture_blend', state.foam_texture_blend)
 
 func _process(delta : float) -> void:
 	if not Engine.is_editor_hint():
@@ -141,6 +172,12 @@ func _render_imgui() -> void:
 			if ImGui.Selectable(label): _apply_sea_preset(preset_index)
 		ImGui.EndCombo()
 	if sea_preset != 0: ImGui.Text(SEA_PRESETS.PRESETS[sea_preset - 1].description)
+	imgui_text_tooltip('Sea State:         ', 'Scales wave height and choppiness, then tunes Jacobian foam persistence.'); ImGui.SameLine()
+	if ImGui.BeginCombo('##sea_state', SEA_PRESETS.SEA_STATES[sea_state].name):
+		for state_index in SEA_PRESETS.SEA_STATES.size():
+			var state_name: String = SEA_PRESETS.SEA_STATES[state_index].name
+			if ImGui.Selectable(state_name): _apply_sea_state(state_index)
+		ImGui.EndCombo()
 	ImGui.Text('Enable Sea Spray:  '); ImGui.SameLine(); if ImGui.Checkbox('##sea_spray_checkbox', _is_sea_spray_visible): $Water/WaterSprayEmitter.visible = _is_sea_spray_visible[0]
 	imgui_text_tooltip('Wave Resolution:   ', 'The resolution of the displacement/normal maps used for each wave cascade.\nThis is also the FFT input size.'); ImGui.SameLine()
 	if ImGui.BeginCombo('##resolution', '%dx%d' % [water.map_size, water.map_size]):
@@ -184,9 +221,10 @@ func _render_imgui() -> void:
 				imgui_text_tooltip('Spread:            ', 'Modifies how much wind and swell affect the direction of the waves.'); ImGui.SameLine(); if ImGui.SliderFloat('##spread', params._spread, 0, 1): params.spread = params._spread[0]
 				imgui_text_tooltip('Detail:            ', 'Modifies the attenuation of high frequency waves.'); ImGui.SameLine(); if ImGui.SliderFloat('##detail', params._detail, 0, 1): params.detail = params._detail[0]
 				ImGui.Dummy(Vector2(0,0)); ImGui.Separator(); ImGui.Dummy(Vector2(0,0))
-				imgui_text_tooltip('Whitecap:          ', 'Modifies how steep a wave needs to be before foam can accumulate.'); ImGui.SameLine(); if ImGui.SliderFloat('##white_cap', params._whitecap, 0, 2): params.whitecap = params._whitecap[0]
+				imgui_text_tooltip('Whitecap:          ', 'Jacobian threshold for fresh breaking foam.'); ImGui.SameLine(); if ImGui.SliderFloat('##white_cap', params._whitecap, 0, 2): params.whitecap = params._whitecap[0]
 				imgui_text_tooltip('Foam Amount:       ', ''); ImGui.SameLine(); if ImGui.SliderFloat('##foam_amount', params._foam_amount, 0, 10): params.foam_amount = params._foam_amount[0]
-				imgui_text_tooltip('Crest Foam Bias:   ', 'Cover elevated, compressed wave tips with foam and bias new foam toward them. Accumulated foam still decays normally.'); ImGui.SameLine(); if ImGui.SliderFloat('##foam_crest_bias', params._foam_crest_bias, 0, 1): params.foam_crest_bias = params._foam_crest_bias[0]
+				imgui_text_tooltip('Foam Decay:        ', 'Controls persistence of total foam coverage.'); ImGui.SameLine(); if ImGui.SliderFloat('##foam_decay', params._foam_decay, 0, 5): params.foam_decay = params._foam_decay[0]
+				imgui_text_tooltip('Foam Dispersion:   ', 'Controls the progressive feedback blur spread.'); ImGui.SameLine(); if ImGui.SliderFloat('##foam_dispersion', params._foam_dispersion, 0, 10): params.foam_dispersion = params._foam_dispersion[0]
 				ImGui.EndTabItem()
 		ImGui.EndTabBar()
 

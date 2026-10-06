@@ -32,7 +32,8 @@ func _check_preset(scene : Node3D, index : int) -> bool:
 		assert(is_equal_approx(water.parameters[i]._wind_direction[0], deg_to_rad(water.parameters[i].wind_direction)))
 		assert(water.parameters[i]._tile_length == [water.parameters[i].tile_length.x, water.parameters[i].tile_length.y])
 		assert(water.parameters[i]._choppiness == [water.parameters[i].choppiness])
-		assert(water.parameters[i]._foam_crest_bias == [water.parameters[i].foam_crest_bias])
+		assert(water.parameters[i]._foam_decay == [water.parameters[i].foam_decay])
+		assert(water.parameters[i]._foam_dispersion == [water.parameters[i].foam_dispersion])
 	assert(water.water_color == preset.water_color)
 	assert(water.foam_color == preset.foam_color)
 	assert(scene._water_color == [preset.water_color.r, preset.water_color.g, preset.water_color.b])
@@ -60,13 +61,37 @@ func _check_preset(scene : Node3D, index : int) -> bool:
 	assert(water.map_size == 128 and water.mesh_quality == 0 and water.updates_per_second == 30.0)
 	assert(scene.get_node('Water/WaterSprayEmitter').amount == 256)
 	assert(not scene.get_node('FogVolume').visible)
+	assert(scene.sea_state == 1)
+	assert(_matches(water.material_override.get_shader_parameter('foam_texture_blend'), scene.SEA_PRESETS.SEA_STATES[1].foam_texture_blend))
 	return true
+
+func _check_sea_states(scene: Node3D) -> void:
+	var states: Array = scene.SEA_PRESETS.SEA_STATES
+	for i in scene.water.parameters.size():
+		var params: WaveCascadeParameters = scene.water.parameters[i]
+		var baseline: Dictionary = scene._sea_state_baseline[i]
+		scene._apply_sea_state(0)
+		assert(is_equal_approx(params.displacement_scale, baseline.displacement_scale * states[0].wave_amplitude_scale))
+		assert(is_equal_approx(params.choppiness, baseline.choppiness * states[0].choppiness_scale))
+		assert(params.foam_amount == 0.0, 'Calm disables open-ocean Jacobian injection.')
+		assert(is_equal_approx(params.foam_decay, states[0].foam_decay))
+		assert(is_equal_approx(params.foam_dispersion, states[0].foam_dispersion))
+		scene._apply_sea_state(2)
+		assert(is_equal_approx(params.displacement_scale, baseline.displacement_scale * states[2].wave_amplitude_scale))
+		assert(is_equal_approx(params.choppiness, baseline.choppiness * states[2].choppiness_scale))
+		assert(is_equal_approx(params.foam_amount, baseline.foam_amount * states[2].foam_amount / states[1].foam_amount))
+		assert(is_equal_approx(params.whitecap, clampf(baseline.whitecap + states[2].whitecap - states[1].whitecap, 0.0, 2.0)))
+		assert(is_equal_approx(params.foam_decay, states[2].foam_decay))
+		assert(is_equal_approx(params.foam_dispersion, states[2].foam_dispersion))
+	scene._apply_sea_state(1)
+	assert(is_equal_approx(scene.water.material_override.get_shader_parameter('foam_texture_blend'), states[1].foam_texture_blend))
 
 func _check_restoration(scene : Node3D) -> bool:
 	# Restore after manual tweaks; the original snapshot must remain independent.
 	scene.water.parameters[0].wind_speed = 100.0
 	scene.water.parameters[0].choppiness = 0.0
-	scene.water.parameters[0].foam_crest_bias = 0.5
+	scene.water.parameters[0].foam_decay = 4.0
+	scene.water.parameters[0].foam_dispersion = 9.0
 	scene.water.water_color = Color.RED
 	scene.water.foam_color = Color.BLACK
 	scene.camera.position = Vector3(40, 50, 60)
@@ -113,6 +138,7 @@ func _run() -> void:
 	for repetition in 3:
 		scene._apply_sea_preset(1)
 		assert(_check_preset(scene, 1))
+		_check_sea_states(scene)
 		for i in seeds.size():
 			assert(scene.water.parameters[i].spectrum_seed == seeds[i])
 			assert(is_equal_approx(scene.water.parameters[i].time, 120.0 + PI*i))
@@ -154,8 +180,7 @@ func _run() -> void:
 	assert(scene.water.time > time_before and scene.water.parameters[0].time > wave_time_before)
 	for i in seeds_before.size(): assert(scene.water.parameters[i].spectrum_seed == seeds_before[i])
 	var code : String = scene.water.material_override.shader.code
-	assert(not code.contains('CAMERA_POSITION_WORLD') and not code.contains('length(VERTEX.xz)'))
-	assert(code.contains('VERTEX += displacement;') and code.contains('gradient *= normal_strength;'))
+	assert(not code.contains('length(VERTEX.xz)') and code.contains('VERTEX += displacement;') and code.contains('gradient *= normal_strength;'))
 	print('PASS: freecam movement; animated world-anchored waves retain generator and seeds')
 	scene.queue_free()
 	for frame in 3: await process_frame
