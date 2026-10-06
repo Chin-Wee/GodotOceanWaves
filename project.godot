@@ -87,3 +87,7 @@ num_cascades={
 "type": "uint",
 "value": 0
 }
+planar_reflection={
+"type": "sampler2D",
+"value": ""
+}

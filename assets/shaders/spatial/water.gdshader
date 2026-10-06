@@ -1,5 +1,5 @@
 shader_type spatial;
-render_mode world_vertex_coords, shadows_disabled;
+render_mode world_vertex_coords, shadows_disabled, cull_disabled;
 /**
  * Sea of Thieves (Rare, SIGGRAPH '18): choppiness peak scattering, artist-authored foam,
  * and a closest-point-on-sphere sun highlight. Fresh-to-aged HF/LF switching follows the parity sheet.
@@ -31,12 +31,20 @@ global uniform uint num_cascades;
 global uniform sampler2DArray displacements;         // Each layer represents one wave cascade.
 global uniform sampler2DArray normals : hint_normal; // Each layer represents one wave cascade.
 global uniform sampler2DArray foam_states;            // R=total persistent foam, G=fresh breaking injection.
+// --- Planar reflection / Snell's window (Sea of Thieves, SIGGRAPH 2018) ---
+global uniform sampler2D planar_reflection;
+uniform float reflection_distortion : hint_range(0.0, 0.1) = 0.025;
+uniform float water_ior : hint_range(1.0, 1.5) = 1.333;
+uniform vec3 underwater_absorption = vec3(0.15, 0.06, 0.03);
+uniform vec4 underwater_fog_color : source_color = vec4(0.015, 0.075, 0.095, 1.0);
 
 varying float wave_height;
 varying float foam_factor;
 varying float fresnel;
 varying float trough_visibility;
 varying float peak_mask;
+varying float camera_depth;
+varying float camera_underwater;
 
 void vertex() {
 	UV = VERTEX.xz;
@@ -52,6 +60,8 @@ void vertex() {
 	}
 	VERTEX += displacement; // Keep world-space wave height independent of freecam position.
 	wave_height = displacement.y;
+	camera_depth = distance(CAMERA_POSITION_WORLD, VERTEX);
+	camera_underwater = step(CAMERA_POSITION_WORLD.y, VERTEX.y);
 }
 
 /** Filter weights for a cubic B-spline. */
@@ -114,10 +124,37 @@ void fragment() {
 
 	float sun_roughness = mix(clamp(roughness, 0.02, 1.0), 0.85, foam_factor);
 	float dot_nv = clamp(dot(VIEW, NORMAL), 0.0, 1.0);
-	fresnel = mix(pow(1.0 - dot_nv, 5.0*exp(-2.69*sun_roughness)) / (1.0 + 22.7*pow(sun_roughness, 1.5)), 1.0, REFLECTANCE);
-	ROUGHNESS = mix(clamp(reflection_roughness, 0.02, 1.0), 0.85, foam_factor);
-	trough_visibility = mix(clamp(trough_light_strength, 0.0, 1.0), 1.0, smoothstep(-1.5, 0.75, wave_height));
-	AO = trough_visibility; // Native ambient occlusion; the cyan transmitted light remains independent.
+	// --- Sea of Thieves planar reflection and underwater Snell's window ---
+	if (camera_underwater > 0.5 && dot(VIEW, NORMAL) < 0.0) {
+		vec3 incident = normalize(-VIEW);
+		vec3 outward_normal = normalize(NORMAL);
+		float cos_incident = clamp(dot(incident, outward_normal), 0.0, 1.0);
+		float snell_k = 1.0 - water_ior * water_ior * (1.0 - cos_incident * cos_incident);
+		float cos_transmitted = sqrt(max(snell_k, 0.0));
+		float fresnel_s = (water_ior * cos_incident - cos_transmitted) / max(water_ior * cos_incident + cos_transmitted, 1e-5);
+		float fresnel_p = (cos_incident - water_ior * cos_transmitted) / max(cos_incident + water_ior * cos_transmitted, 1e-5);
+		fresnel = snell_k < 0.0 ? 1.0 : 0.5 * (fresnel_s * fresnel_s + fresnel_p * fresnel_p);
+		vec3 refracted_view = refract(incident, -outward_normal, water_ior);
+		vec4 projected = PROJECTION_MATRIX * vec4(refracted_view, 0.0);
+		vec2 refracted_uv = projected.xy / max(projected.w, 1e-5) * vec2(0.5, -0.5) + vec2(0.5);
+		refracted_uv += gradient.xy * reflection_distortion;
+		vec3 transmitted = texture(planar_reflection, clamp(refracted_uv, vec2(0.001), vec2(0.999))).rgb;
+		vec3 transmittance = exp(-underwater_absorption * camera_depth);
+		vec3 absorbed = transmitted * transmittance + underwater_fog_color.rgb * (1.0 - transmittance);
+		EMISSION = snell_k < 0.0 ? underwater_fog_color.rgb : mix(absorbed, water_color.rgb, fresnel);
+		ALBEDO = vec3(1e-4);
+		trough_visibility = 1.0;
+		ROUGHNESS = 1.0;
+		AO = 1.0;
+	} else {
+		fresnel = mix(pow(1.0 - dot_nv, 5.0*exp(-2.69*sun_roughness)) / (1.0 + 22.7*pow(sun_roughness, 1.5)), 1.0, REFLECTANCE);
+		vec2 reflection_uv = clamp(SCREEN_UV + gradient.xy * reflection_distortion, vec2(0.001), vec2(0.999));
+		EMISSION += texture(planar_reflection, reflection_uv).rgb * fresnel;
+		ALBEDO *= 1.0 - fresnel;
+		ROUGHNESS = mix(clamp(reflection_roughness, 0.02, 1.0), 0.85, foam_factor);
+		trough_visibility = mix(clamp(trough_light_strength, 0.0, 1.0), 1.0, smoothstep(-1.5, 0.75, wave_height));
+		AO = trough_visibility; // Native ambient occlusion; the cyan transmitted light remains independent.
+	}
 }
 
 float smith_masking_shadowing(in float cos_theta, in float alpha) {
@@ -134,6 +171,7 @@ float ggx_distribution(in float cos_theta, in float alpha) {
 }
 
 void light() {
+	if (camera_underwater > 0.5 && dot(VIEW, NORMAL) < 0.0) return;
 	vec3 sun_direction = normalize(LIGHT);
 	vec3 reflection_direction = normalize(reflect(-VIEW, NORMAL));
 	float sun_cos_angle = clamp(dot(sun_direction, reflection_direction), -1.0, 1.0);
