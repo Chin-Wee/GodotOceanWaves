@@ -39,15 +39,16 @@ func _run() -> void:
 	interaction.name = 'InteractionFoam'
 	interaction.set_script(load('res://assets/water/interaction_foam.gd'))
 	interaction.set('top_down_extent', 16.0)
+	interaction.set('submerged_interaction_depth', 3.0)
 	scene.add_child(interaction)
 
-	# A top face exactly at sea level is a repeatable opaque depth contact.
+	# The top face is above the waterline while the visible underside is submerged.
 	var target := MeshInstance3D.new()
-	target.name = 'WaterlineProbe'
+	target.name = 'WaterlineHullProbe'
 	var box := BoxMesh.new()
-	box.size = Vector3(4.0, 1.0, 4.0)
+	box.size = Vector3(4.0, 1.5, 4.0)
 	target.mesh = box
-	target.position = Vector3(6.0, -0.5, -21.0)
+	target.position = Vector3(6.0, 0.25, -21.0)
 	var target_material := StandardMaterial3D.new()
 	target_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	target.material_override = target_material
@@ -56,10 +57,13 @@ func _run() -> void:
 		await process_frame
 
 	var source_image := await _read_texture(interaction.top_down_viewport)
+	var submerged_image := await _read_texture(interaction.submerged_viewport)
 	var history_image := await _read_texture(interaction.history_viewports[interaction._write_index ^ 1])
 	var source_uv := Vector2(0.6875, 0.625) # world (6, -21) in the 32 m camera-centered window
-	assert(_sample(source_image, source_uv) > 0.5, 'Top-down depth source must mark the opaque waterline contact at its world-plane UV.')
-	assert(_sample(history_image, source_uv) > 0.25, 'History buffer must accumulate the contact at the same world-plane UV.')
+	var submerged_source_uv := Vector2(source_uv.x, 1.0 - source_uv.y) # upward camera has the opposite vertical screen axis
+	assert(_sample(source_image, source_uv) < 0.1, 'Top-down pass must not mistake the above-water deck for a waterline contact.')
+	assert(_sample(submerged_image, submerged_source_uv) > 0.5, 'Upward depth source must mark the visible submerged hull underside.')
+	assert(_sample(history_image, source_uv) > 0.25, 'History buffer must align the underside contact into shared world-plane UVs.')
 
 	# Remove the source, move the window, and verify that history follows the fixed world point.
 	target.queue_free()
@@ -70,5 +74,5 @@ func _run() -> void:
 	var moved_image := await _read_texture(interaction.history_viewports[interaction._write_index ^ 1])
 	var moved_uv := Vector2(0.4375, 0.5)
 	assert(_sample(moved_image, moved_uv) > 0.1, 'History must remain aligned after the camera-centered window moves.')
-	print('PASS: top-down depth contact, history accumulation, and camera-window reprojection at matching world-plane UVs.')
+	print('PASS: above-water deck rejection, submerged underside contact, shared world-plane UV alignment, and camera-window trail persistence.')
 	quit()

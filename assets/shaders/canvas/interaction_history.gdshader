@@ -1,6 +1,7 @@
 shader_type canvas_item;
 
 uniform sampler2D contact_mask : repeat_disable, filter_linear;
+uniform sampler2D submerged_mask : repeat_disable, filter_linear;
 uniform sampler2D previous_history : repeat_disable, filter_linear;
 uniform vec2 current_center;
 uniform vec2 previous_center;
@@ -12,7 +13,10 @@ uniform float blur_pixels = 1.25;
 uniform bool history_valid = false;
 
 void fragment() {
-	float current_contact = texture(contact_mask, UV).r;
+	// The underside camera's up axis is opposite, so flip V into the shared world-plane UVs.
+	float top_contact = texture(contact_mask, UV).r;
+	float submerged_contact = texture(submerged_mask, vec2(UV.x, 1.0 - UV.y)).r;
+	float current_contact = max(top_contact, submerged_contact);
 	float inherited = 0.0;
 	if (history_valid) {
 		vec2 world_xz = current_center + (UV - 0.5) * (extent * 2.0) - current_velocity * delta;
