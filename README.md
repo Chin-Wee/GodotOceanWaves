@@ -35,11 +35,13 @@ Foam blends both roughness controls toward **0.85**. Angle inputs and effective 
 
 The Water node exposes deep-water (`#06495F`) and foam (`#E9EFE5`) colors. Cascade Resources and the existing runtime cascade tabs contain choppiness, whitecap, foam amount and crest foam bias. Trough darkness uses native ambient occlusion plus a height-based diffuse-light approximation; it adds no shadow pass. The original filtered normal construction is retained; sharper tips come from horizontal FFT displacement. Daylight camera height is **2.5 m**, pitch **12° down**, FOV **75°**, with the authored yaw retained.
 
-### Freecam and crest coverage
+### Embedded panel input
 
 In Godot's embedded Game view, select **Input** beside **2D / 3D** to edit the runtime panel. Embedded play uses the plugin's existing viewport-local input backend, so panel clicks remain aligned when the editor resizes or moves the game view. Freecam movement pauses while the panel captures mouse or keyboard input. Releasing RMB always restores the cursor, including over the panel.
 
 Run `Godot --path . --script res://checks/panel_input.gd` to check panel clicks, slider editing and freecam input capture on the native renderer.
+
+### Freecam and crest coverage
 
 **RMB** looks around; **WASD** moves, **Q/E** descends/ascends, **Shift** boosts speed and the mouse wheel changes speed. Waves keep animating. The existing world-coordinate FFT sampling and camera-following clipmap are retained. Camera-driven attenuation of displacement, normal strength and foam has been removed: moving or pitching the camera no longer changes those wave-field values. Perspective, reflections and highlights still respond to the view. The mesh retains its existing coarse outer rings.
 
