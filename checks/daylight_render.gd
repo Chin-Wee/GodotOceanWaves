@@ -157,8 +157,8 @@ func _run() -> void:
 	root.content_scale_size = Vector2i(1920, 1080)
 	root.content_scale_mode = Window.CONTENT_SCALE_MODE_VIEWPORT
 	root.always_on_top = true # Keep the test viewport visible while collecting GPU timings.
-	for frame in 2: await process_frame
 	var reflection = scene.get_node('PlanarReflection')
+	reflection._process(0.0)
 	assert((reflection.capture_camera.cull_mask & ((1 << 18) | (1 << 19))) == 0)
 	assert((reflection.capture_camera.cull_mask & (1 << 20)) != 0)
 	scene.camera.set_process(false)
