@@ -31,6 +31,10 @@ global uniform uint num_cascades;
 global uniform sampler2DArray displacements;         // Each layer represents one wave cascade.
 global uniform sampler2DArray normals : hint_normal; // Each layer represents one wave cascade.
 global uniform sampler2DArray foam_states;            // R=total persistent foam, G=fresh breaking injection.
+global uniform sampler2D interaction_foam_texture;
+global uniform vec2 interaction_foam_center;
+global uniform float interaction_foam_extent;
+global uniform float interaction_foam_strength;
 // --- Planar reflection / Snell's window (Sea of Thieves, SIGGRAPH 2018) ---
 global uniform sampler2D planar_reflection;
 uniform float reflection_distortion : hint_range(0.0, 0.1) = 0.025;
@@ -117,6 +121,11 @@ void fragment() {
 	float age_blend = smoothstep(0.05, 0.85, freshness) * clamp(foam_texture_blend, 0.0, 1.0);
 	float breakup = mix(foam_lf, foam_hf, age_blend);
 	foam_factor = smoothstep(0.05, 0.95, foam_state.x * mix(0.5, 1.0, breakup));
+	// Rare's camera-centered depth contacts map back into the same world-plane UV as the surface.
+	vec2 interaction_uv = (UV - interaction_foam_center) / max(interaction_foam_extent * 2.0, 1e-4) + 0.5;
+	float inside_interaction_bounds = float(all(greaterThanEqual(interaction_uv, vec2(0.0))) && all(lessThanEqual(interaction_uv, vec2(1.0))));
+	float interaction_amount = texture(interaction_foam_texture, clamp(interaction_uv, vec2(0.0), vec2(1.0))).r * interaction_foam_strength * inside_interaction_bounds;
+	foam_factor = max(foam_factor, smoothstep(0.03, 0.4, interaction_amount));
 	ALBEDO = max(mix(water_color.rgb, foam_color.rgb, foam_factor), vec3(1e-4));
 
 	gradient *= normal_strength;

@@ -115,5 +115,13 @@ func _update_water(delta : float) -> void:
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_PREDELETE:
+		var empty_image := Image.create(1, 1, false, Image.FORMAT_RGBA8)
+		empty_image.fill(Color.BLACK)
+		var empty_array := Texture2DArray.new()
+		empty_array.create_from_images([empty_image])
+		RenderingServer.global_shader_parameter_set(&'num_cascades', 0)
+		RenderingServer.global_shader_parameter_set(&'displacements', empty_array)
+		RenderingServer.global_shader_parameter_set(&'normals', empty_array)
+		RenderingServer.global_shader_parameter_set(&'foam_states', empty_array)
 		displacement_maps.texture_rd_rid = RID()
 		normal_maps.texture_rd_rid = RID()

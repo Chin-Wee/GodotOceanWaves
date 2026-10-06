@@ -73,3 +73,8 @@ func _set_capture_excluded_layer(node: Node) -> void:
 		node.layers = CAPTURE_EXCLUDED_LAYER
 	for child in node.get_children():
 		_set_capture_excluded_layer(child)
+
+func _exit_tree() -> void:
+	var image := Image.create(1, 1, false, Image.FORMAT_RGBA8)
+	image.fill(Color.BLACK)
+	RenderingServer.global_shader_parameter_set(&"planar_reflection", ImageTexture.create_from_image(image))
