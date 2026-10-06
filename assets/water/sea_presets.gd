@@ -5,7 +5,7 @@ extends RefCounted
 const PRESETS := [
 	{
 		'name': 'Daylight Ocean',
-		'description': 'Blue troughs, cyan faces and foam-covered crest tops.',
+		'description': 'Blue troughs, cyan crests and sparse whitecaps.',
 		'water_color': Color('#06495F'),
 		'foam_color': Color('#E9EFE5'),
 		'material': {
@@ -33,13 +33,24 @@ const PRESETS := [
 		'cascades': [
 			{'tile_length': Vector2(88, 88), 'displacement_scale': 1.0, 'choppiness': 1.25, 'normal_scale': 1.0,
 			 'wind_speed': 10.0, 'wind_direction': 20.0, 'fetch_length': 150.0,
-			 'swell': 0.8, 'spread': 0.2, 'detail': 1.0, 'whitecap': 0.5, 'foam_amount': 5.0, 'foam_crest_bias': 1.0},
+			 'swell': 0.8, 'spread': 0.2, 'detail': 1.0, 'whitecap': 0.35, 'foam_amount': 5.0, 'foam_decay': 0.35, 'foam_dispersion': 3.0},
 			{'tile_length': Vector2(57, 57), 'displacement_scale': 0.75, 'choppiness': 1.15, 'normal_scale': 1.0,
 			 'wind_speed': 5.0, 'wind_direction': 15.0, 'fetch_length': 150.0,
-			 'swell': 0.8, 'spread': 0.4, 'detail': 1.0, 'whitecap': 0.5, 'foam_amount': 0.0, 'foam_crest_bias': 0.0},
+			 'swell': 0.8, 'spread': 0.4, 'detail': 1.0, 'whitecap': 0.5, 'foam_amount': 0.0, 'foam_decay': 0.35, 'foam_dispersion': 3.0},
 			{'tile_length': Vector2(16, 16), 'displacement_scale': 0.0, 'choppiness': 1.0, 'normal_scale': 0.25,
 			 'wind_speed': 20.0, 'wind_direction': 20.0, 'fetch_length': 550.0,
-			 'swell': 0.8, 'spread': 0.4, 'detail': 1.0, 'whitecap': 0.25, 'foam_amount': 0.0, 'foam_crest_bias': 0.0},
+			 'swell': 0.8, 'spread': 0.4, 'detail': 1.0, 'whitecap': 0.25, 'foam_amount': 0.0, 'foam_decay': 0.35, 'foam_dispersion': 3.0},
 		],
 	},
+]
+
+const SEA_STATES := [
+	# Wave values are multipliers so the existing per-cascade balance is preserved.
+	# foam_texture_blend is the authored HF/LF breakup contribution consumed by the water material.
+	{'name': 'Calm', 'wave_amplitude_scale': 0.65, 'choppiness_scale': 0.8,
+		'foam_amount': 0.0, 'whitecap': 0.35, 'foam_decay': 0.8, 'foam_dispersion': 2.0, 'foam_texture_blend': 0.25},
+	{'name': 'Normal', 'wave_amplitude_scale': 1.0, 'choppiness_scale': 1.0,
+		'foam_amount': 5.0, 'whitecap': 0.35, 'foam_decay': 0.35, 'foam_dispersion': 3.0, 'foam_texture_blend': 0.65},
+	{'name': 'Storm', 'wave_amplitude_scale': 1.4, 'choppiness_scale': 1.3,
+		'foam_amount': 8.0, 'whitecap': 0.65, 'foam_decay': 0.2, 'foam_dispersion': 6.0, 'foam_texture_blend': 1.0},
 ]

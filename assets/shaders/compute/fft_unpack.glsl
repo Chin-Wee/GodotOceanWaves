@@ -11,7 +11,8 @@
 layout(local_size_x = TILE_SIZE, local_size_y = TILE_SIZE, local_size_z = 2) in;
 
 layout(rgba16f, set = 0, binding = 0) restrict writeonly uniform image2DArray displacement_map;
-layout(rgba16f, set = 0, binding = 1) restrict uniform image2DArray normal_map;
+layout(rgba16f, set = 0, binding = 1) restrict writeonly uniform image2DArray normal_map;
+layout(r16f, set = 0, binding = 2) restrict writeonly uniform image2DArray breaking_map;
 
 layout(std430, set = 1, binding = 0) restrict buffer FFTBuffer {
 	vec2 data[]; // map_size x map_size x num_spectra x 2 * num_cascades
@@ -20,9 +21,6 @@ layout(std430, set = 1, binding = 0) restrict buffer FFTBuffer {
 layout(push_constant) restrict readonly uniform PushConstants {
 	uint cascade_index;
 	float whitecap;
-	float foam_grow_rate;
-	float foam_decay_rate;
-	float foam_crest_bias;
 };
 
 // Tiling doesn't provide much of a benefit here (but it does a *little*)
@@ -48,7 +46,9 @@ void main() {
 			float hx = tile[0][id_local.y][id_local.x].x;
 			float hy = tile[0][id_local.y][id_local.x].y;
 			float hz = tile[1][id_local.y][id_local.x].x;
-			imageStore(displacement_map, id, vec4(hx, hy, hz, 0) * sign_shift);
+			float chop_length = length(vec2(hx, hz));
+			float peak_mask = chop_length / (1.0 + chop_length);
+			imageStore(displacement_map, id, vec4(vec3(hx, hy, hz) * sign_shift, peak_mask));
 			break;
 		case 1:
 			float dhy_dx = tile[1][id_local.y][id_local.x].y * sign_shift;
@@ -58,19 +58,11 @@ void main() {
 			float dhz_dx = tile[3][id_local.y][id_local.x].y * sign_shift;
 
 			float jacobian = (1.0 + dhx_dx) * (1.0 + dhz_dz) - dhz_dx*dhz_dx;
-			float height = tile[0][id_local.y][id_local.x].y * sign_shift;
-			float crest = smoothstep(0.25, 1.25, height);
-			float foam_factor = -min(0, jacobian - whitecap) * mix(1.0, crest, foam_crest_bias);
-			float foam = imageLoad(normal_map, id).a;
-			foam *= exp(-foam_decay_rate);
-			foam += foam_factor * foam_grow_rate;
-			// Sea of Thieves-style crest coverage, retaining the original accumulated foam trail.
-			float tip_coverage = crest * (1.0 - smoothstep(whitecap, whitecap + 0.3, jacobian));
-			if (foam_grow_rate > 0.0) foam = max(foam, tip_coverage * foam_crest_bias);
-			foam = clamp(foam, 0.0, 1.0);
+			float breaking = max(0.0, whitecap - jacobian);
+			imageStore(breaking_map, id, vec4(breaking, 0.0, 0.0, 1.0));
 
 			vec2 gradient = vec2(dhy_dx, dhy_dz) / (1.0 + abs(vec2(dhx_dx, dhz_dz)));
-			imageStore(normal_map, id, vec4(gradient, dhx_dx, foam));
+			imageStore(normal_map, id, vec4(gradient, dhx_dx, 0.0));
 			break;
 	}
 }

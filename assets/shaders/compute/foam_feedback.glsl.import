@@ -1,0 +1,13 @@
+[remap]
+
+importer="glsl"
+type="RDShaderFile"
+uid="uid://sp3du8pkfken"
+path="res://.godot/imported/foam_feedback.glsl-34fc6d6ac641fa9d5487ec8a045c1869.res"
+
+[deps]
+
+source_file="res://assets/shaders/compute/foam_feedback.glsl"
+dest_files=["res://.godot/imported/foam_feedback.glsl-34fc6d6ac641fa9d5487ec8a045c1869.res"]
+
+[params]

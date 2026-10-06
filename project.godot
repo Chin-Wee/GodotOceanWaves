@@ -71,6 +71,10 @@ normals={
 "type": "sampler2DArray",
 "value": ""
 }
+foam_states={
+"type": "sampler2DArray",
+"value": ""
+}
 water_color={
 "type": "color",
 "value": Color(0.0100228, 0.0196066, 0.0272118, 1)

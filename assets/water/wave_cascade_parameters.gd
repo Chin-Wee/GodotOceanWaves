@@ -33,28 +33,26 @@ signal scale_changed
 	set(value): detail = value; should_generate_spectrum = true; _detail = [value]
 
 ## Modifies how steep a wave needs to be before foam can accumulate.
-@export_range(0, 2) var whitecap := 0.5 : # Note: 'Wispier' foam can be created by increasing the 'foam_amount' and decreasing the 'whitecap' parameters.
-	set(value): whitecap = value; should_generate_spectrum = true; _whitecap = [value]
-## Cover elevated, compressed wave tips and bias new foam toward them, retaining foam trails and decay.
-@export_range(0, 1) var foam_crest_bias := 0.0 :
-	set(value): foam_crest_bias = value; _foam_crest_bias = [value]
+@export_range(0, 2) var whitecap := 0.5 : # Lower the Jacobian threshold for sparser foam; raise it for more breaking.
+	set(value): whitecap = value; _whitecap = [value]
 
 @export_range(0, 10) var foam_amount := 5.0 :
-	set(value): foam_amount = value; should_generate_spectrum = true; _foam_amount = [value]
+	set(value): foam_amount = value; _foam_amount = [value]
+@export_range(0, 5, 0.01) var foam_decay := 0.35 :
+	set(value): foam_decay = value; _foam_decay = [value]
+@export_range(0, 10, 0.01) var foam_dispersion := 3.0 :
+	set(value): foam_dispersion = value; _foam_dispersion = [value]
 
 var spectrum_seed := Vector2i.ZERO
 var should_generate_spectrum := true
 
 var time : float
-var foam_grow_rate : float
-var foam_decay_rate : float
 
 # References to wave cascade parameters (for imgui). The actual parameters won't
 # reflect these values unless manually synced!
 var _tile_length := [tile_length.x, tile_length.y]
 var _displacement_scale := [displacement_scale]
 var _choppiness := [choppiness]
-var _foam_crest_bias := [foam_crest_bias]
 var _normal_scale := [normal_scale]
 var _wind_speed := [wind_speed]
 var _wind_direction := [deg_to_rad(wind_direction)]
@@ -64,3 +62,5 @@ var _detail := [detail]
 var _spread := [spread]
 var _whitecap := [whitecap]
 var _foam_amount := [foam_amount]
+var _foam_decay := [foam_decay]
+var _foam_dispersion := [foam_dispersion]
