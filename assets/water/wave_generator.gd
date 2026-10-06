@@ -6,13 +6,17 @@ const G := 9.81
 const DEPTH := 20.0
 
 var map_size : int
+var num_cascades : int
 var context : RenderingContext
 var pipelines : Dictionary
 var descriptors : Dictionary
+var foam_states_texture := Texture2DArrayRD.new()
+var foam_state_index := 0
 
 # Generator state per invocation of `update()`.
 var pass_parameters : Array[WaveCascadeParameters]
 var pass_num_cascades_remaining : int
+var pass_delta := 0.0
 
 func init_gpu(num_cascades : int) -> void:
 	# --- DEVICE/SHADER CREATION ---
@@ -23,23 +27,36 @@ func init_gpu(num_cascades : int) -> void:
 	var fft_compute_shader := context.load_shader('./assets/shaders/compute/fft_compute.glsl')
 	var transpose_shader := context.load_shader('./assets/shaders/compute/transpose.glsl')
 	var fft_unpack_shader := context.load_shader('./assets/shaders/compute/fft_unpack.glsl')
+	var foam_feedback_shader := context.load_shader('./assets/shaders/compute/foam_feedback.glsl')
 
 	# --- DESCRIPTOR PREPARATION ---
 	var dims := Vector2i(map_size, map_size)
 	var num_fft_stages := int(log(map_size) / log(2))
+	self.num_cascades = num_cascades
 
 	descriptors[&'spectrum'] = context.create_texture(dims, RenderingDevice.DATA_FORMAT_R32G32B32A32_SFLOAT, RenderingDevice.TEXTURE_USAGE_STORAGE_BIT | RenderingDevice.TEXTURE_USAGE_CAN_COPY_FROM_BIT, num_cascades)
 	descriptors[&'butterfly_factors'] = context.create_storage_buffer(num_fft_stages*map_size * 4 * 4)         # Size: (#FFT stages * map size * sizeof(vec4))
 	descriptors[&'fft_buffer'] = context.create_storage_buffer(num_cascades * map_size*map_size * 4*2 * 2 * 4) # Size: (map size^2 * 4 FFTs * 2 temp buffers (for Stockham FFT) * sizeof(vec2))
 	descriptors[&'displacement_map'] = context.create_texture(dims, RenderingDevice.DATA_FORMAT_R16G16B16A16_SFLOAT, RenderingDevice.TEXTURE_USAGE_STORAGE_BIT | RenderingDevice.TEXTURE_USAGE_SAMPLING_BIT | RenderingDevice.TEXTURE_USAGE_CAN_UPDATE_BIT, num_cascades)
 	descriptors[&'normal_map'] = context.create_texture(dims, RenderingDevice.DATA_FORMAT_R16G16B16A16_SFLOAT, RenderingDevice.TEXTURE_USAGE_STORAGE_BIT | RenderingDevice.TEXTURE_USAGE_SAMPLING_BIT | RenderingDevice.TEXTURE_USAGE_CAN_UPDATE_BIT, num_cascades)
+	descriptors[&'breaking_map'] = context.create_texture(dims, RenderingDevice.DATA_FORMAT_R16_SFLOAT, RenderingDevice.TEXTURE_USAGE_STORAGE_BIT, num_cascades)
+	var foam_usage := RenderingDevice.TEXTURE_USAGE_STORAGE_BIT | RenderingDevice.TEXTURE_USAGE_SAMPLING_BIT | RenderingDevice.TEXTURE_USAGE_CAN_UPDATE_BIT | RenderingDevice.TEXTURE_USAGE_CAN_COPY_TO_BIT
+	descriptors[&'foam_state_a'] = context.create_texture(dims, RenderingDevice.DATA_FORMAT_R16G16_SFLOAT, foam_usage, num_cascades)
+	descriptors[&'foam_state_b'] = context.create_texture(dims, RenderingDevice.DATA_FORMAT_R16G16_SFLOAT, foam_usage, num_cascades)
+	assert(context.device.texture_clear(descriptors[&'foam_state_a'].rid, Color(0, 0, 0, 0), 0, 1, 0, num_cascades) == OK)
+	assert(context.device.texture_clear(descriptors[&'foam_state_b'].rid, Color(0, 0, 0, 0), 0, 1, 0, num_cascades) == OK)
+	foam_state_index = 0
+	foam_states_texture.texture_rd_rid = descriptors[&'foam_state_a'].rid
+	RenderingServer.global_shader_parameter_set(&'foam_states', foam_states_texture)
 
 	var spectrum_compute_set := context.create_descriptor_set([descriptors[&'spectrum']], spectrum_compute_shader, 0)
 	var spectrum_modulate_set := context.create_descriptor_set([descriptors[&'spectrum']], spectrum_modulate_shader, 0)
 	var fft_butterfly_set := context.create_descriptor_set([descriptors[&'butterfly_factors']], fft_butterfly_shader, 0)
 	var fft_compute_set := context.create_descriptor_set([descriptors[&'butterfly_factors'], descriptors[&'fft_buffer']], fft_compute_shader, 0)
 	var fft_buffer_set := context.create_descriptor_set([descriptors[&'fft_buffer']], spectrum_modulate_shader, 1)
-	var unpack_set := context.create_descriptor_set([descriptors[&'displacement_map'], descriptors[&'normal_map']], fft_unpack_shader, 0)
+	var unpack_set := context.create_descriptor_set([descriptors[&'displacement_map'], descriptors[&'normal_map'], descriptors[&'breaking_map']], fft_unpack_shader, 0)
+	var foam_state_a_to_b_set := context.create_descriptor_set([descriptors[&'foam_state_a'], descriptors[&'breaking_map'], descriptors[&'foam_state_b']], foam_feedback_shader, 0)
+	var foam_state_b_to_a_set := context.create_descriptor_set([descriptors[&'foam_state_b'], descriptors[&'breaking_map'], descriptors[&'foam_state_a']], foam_feedback_shader, 0)
 
 	# --- COMPUTE PIPELINE CREATION ---
 	pipelines[&'spectrum_compute'] = context.create_pipeline([map_size/16, map_size/16, 1], [spectrum_compute_set], spectrum_compute_shader)
@@ -48,6 +65,8 @@ func init_gpu(num_cascades : int) -> void:
 	pipelines[&'fft_compute'] = context.create_pipeline([1, map_size, 4], [fft_compute_set], fft_compute_shader)
 	pipelines[&'transpose'] = context.create_pipeline([map_size/32, map_size/32, 4], [fft_compute_set], transpose_shader)
 	pipelines[&'fft_unpack'] = context.create_pipeline([map_size/16, map_size/16, 1], [unpack_set, fft_buffer_set], fft_unpack_shader)
+	pipelines[&'foam_feedback_a_to_b'] = context.create_pipeline([map_size/16, map_size/16, num_cascades], [foam_state_a_to_b_set], foam_feedback_shader)
+	pipelines[&'foam_feedback_b_to_a'] = context.create_pipeline([map_size/16, map_size/16, num_cascades], [foam_state_b_to_a_set], foam_feedback_shader)
 
 	# We only need to generate butterfly factors once for each map_size.
 	var compute_list := context.compute_list_begin()
@@ -82,8 +101,15 @@ func _update(compute_list : int, cascade_index : int, parameters : Array[WaveCas
 	context.compute_list_add_barrier(compute_list) # FIXME: Why is a barrier only needed here?!
 	pipelines[&'fft_compute'].call(context, compute_list, fft_push_constant)
 
-	## --- DISPLACEMENT/NORMAL MAP UPDATE ---
-	pipelines[&'fft_unpack'].call(context, compute_list, RenderingContext.create_push_constant([cascade_index, params.whitecap, params.foam_grow_rate, params.foam_decay_rate, params.foam_crest_bias]))
+	## --- DISPLACEMENT, NORMAL, AND JACOBIAN UPDATE ---
+	pipelines[&'fft_unpack'].call(context, compute_list, RenderingContext.create_push_constant([cascade_index, params.whitecap]))
+	context.compute_list_add_barrier(compute_list)
+	var foam_feedback_key := &'foam_feedback_a_to_b' if foam_state_index == 0 else &'foam_feedback_b_to_a'
+	pipelines[foam_feedback_key].call(context, compute_list, RenderingContext.create_push_constant([cascade_index, pass_delta, params.foam_amount * 7.5, params.foam_decay, params.foam_dispersion]))
+	context.compute_list_add_barrier(compute_list)
+	foam_state_index = 1 - foam_state_index
+	foam_states_texture.texture_rd_rid = descriptors[&'foam_state_a' if foam_state_index == 0 else &'foam_state_b'].rid
+	RenderingServer.global_shader_parameter_set(&'foam_states', foam_states_texture)
 
 ## Begins updating wave cascades based on the provided parameters. To balance stutter,
 ## the generator will schedule one cascade update per frame. All cascades from the
@@ -102,9 +128,7 @@ func update(delta : float, parameters : Array[WaveCascadeParameters]) -> void:
 	for i in len(parameters):
 		var params := parameters[i]
 		params.time += delta
-		# Note: The constants are used to normalize parameters between 0 and 10.
-		params.foam_grow_rate = delta * params.foam_amount*7.5
-		params.foam_decay_rate = delta * maxf(0.5, 10.0 - params.foam_amount)*1.15
+	pass_delta = delta
 
 	pass_parameters = parameters
 	pass_num_cascades_remaining = len(parameters)
