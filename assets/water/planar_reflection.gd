@@ -74,6 +74,7 @@ func _ready() -> void:
 	RenderingServer.global_shader_parameter_set(&"planar_reflection", capture_viewport.get_texture())
 
 func _process(_delta: float) -> void:
+	# InteractionFoam removes its capture layers after this node's _ready has built the camera.
 	var capture_mask := (source_camera.cull_mask & ~CAPTURE_EXCLUDED_LAYER) | REFLECTION_CLIP_LAYER
 	if capture_camera.cull_mask != capture_mask:
 		capture_camera.cull_mask = capture_mask
