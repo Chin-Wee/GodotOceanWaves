@@ -21,6 +21,7 @@ render_priority = 1
 shader = ExtResource("1_uffek")
 shader_parameter/foam_hf_pattern = ExtResource("2_foam_hf")
 shader_parameter/foam_lf_pattern = SubResource("NoiseTexture2D_foam_lf")
+shader_parameter/foam_texture_blend = 1.0
 shader_parameter/roughness = 0.65
 shader_parameter/reflection_roughness = 0.4
 shader_parameter/crest_color = Color(0.219608, 0.729412, 0.760784, 1)

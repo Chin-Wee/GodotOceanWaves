@@ -9,6 +9,8 @@ func _initialize() -> void:
 	assert(water.contains('peak_mask = max(peak_mask, wave.a)'))
 	assert(water.contains('foam_state.y / max(foam_state.x'))
 	assert(water.contains('foam_hf_pattern') and water.contains('foam_lf_pattern'))
+	assert(water.contains('uniform float foam_texture_blend'))
+	assert(water.contains('smoothstep(0.05, 0.85, freshness) * clamp(foam_texture_blend'))
 	assert(water.contains('sin(sun_radius)'))
 	assert(spray.contains('texture(foam_states, vec3(START_POS.xz*map_scales[i].xy, float(i))).g'))
 	assert(not spray.contains('gradient.z'))
@@ -16,5 +18,6 @@ func _initialize() -> void:
 	var lf_pattern := material.get_shader_parameter('foam_lf_pattern') as NoiseTexture2D
 	assert(hf_pattern.resource_path == 'res://assets/water/sea_spray.png')
 	assert(lf_pattern != null and lf_pattern.seamless and lf_pattern.noise is FastNoiseLite)
+	assert(is_equal_approx(material.get_shader_parameter('foam_texture_blend'), 1.0))
 	print('PASS: Sea of Thieves water shader consumes peak/fresh foam, authored breakup and area sun; spray uses fresh foam only')
 	quit()
