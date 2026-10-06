@@ -266,7 +266,7 @@
       "addons_imgui_godot_imguigodot_imguigd",
       "addons_imgui_godot_imguigodot_imguilayer",
       "addons_imgui_godot_imguigodot_internal_backendnative",
-      "addons_imgui_godot_imguigodot_internal_fonts",
+      "addons_imgui_godot_imguigodot_internal_backendnet",
       "addons_imgui_godot_imguigodot_internal_input",
       "addons_imgui_godot_imguigodot_internal_rdrenderer",
       "addons_imgui_godot_imguigodot_internal_rdrenderer_imguigodot_internal_rdrendererexception",
@@ -303,6 +303,7 @@
       "viewportdata"
     ],
     "11": [
+      "addons_imgui_godot_imguigodot_internal_fonts",
       "addons_imgui_godot_imguigodot_internal_fonts_cs_fontfile",
       "addons_imgui_godot_imguigodot_internal_fonts_cs_list",
       "addons_imgui_godot_imguigodot_internal_fonts_cs_texture2d",
@@ -340,7 +341,6 @@
       "uv1"
     ],
     "13": [
-      "addons_imgui_godot_imguigodot_internal_backendnet",
       "addons_imgui_godot_imguigodot_internal_backendnet_cs_callable",
       "addons_imgui_godot_imguigodot_internal_backendnet_cs_fontfile",
       "addons_imgui_godot_imguigodot_internal_backendnet_cs_subviewport",
@@ -401,30 +401,6 @@
       "addons_imgui_godot_imguigodot_internal_dummyrenderer_imguigodot_internal_dummyrenderer_name",
       "addons_imgui_godot_imguigodot_internal_dummyrenderer_imguigodot_internal_dummyrenderer_onhide",
       "addons_imgui_godot_imguigodot_internal_dummyrenderer_imguigodot_internal_dummyrenderer_render"
-    ],
-    "17": [
-      "readme",
-      "readme_attribution",
-      "readme_daylight_controls",
-      "readme_earlier_validation_2026_10_05_source_revision_7d48a1e",
-      "readme_embedded_panel_input",
-      "readme_fast_fourier_transform",
-      "readme_freecam_foam_and_reflections",
-      "readme_godotoceanwaves",
-      "readme_introduction",
-      "readme_lighting_model",
-      "readme_load_balancing",
-      "readme_ocean_wave_spectra",
-      "readme_preset_validation",
-      "readme_references",
-      "readme_results",
-      "readme_sea_foam",
-      "readme_sea_presets",
-      "readme_sea_spray",
-      "readme_wave_cascades",
-      "readme_wave_shading",
-      "readme_wave_simulation",
-      "readme_why_fourier_transforms"
     ]
   },
   "cohesion": {
@@ -439,13 +415,12 @@
     "8": 0.12631578947368421,
     "9": 0.11695906432748537,
     "10": 0.17647058823529413,
-    "11": 0.16911764705882354,
+    "11": 0.1568627450980392,
     "12": 0.19166666666666668,
-    "13": 0.125,
+    "13": 0.13333333333333333,
     "14": 0.1619047619047619,
     "15": 0.18681318681318682,
-    "16": 0.25,
-    "17": 0.09090909090909091
+    "16": 0.25
   },
   "gods": [
     {
@@ -464,23 +439,23 @@
       "degree": 20
     },
     {
-      "id": "addons_imgui_godot_imguigodot_internal_backendnative_imguigodot_internal_backendnative",
-      "label": "BackendNative",
-      "degree": 17
-    },
-    {
       "id": "csharp_namespace:af2e19087c74ac4a",
       "label": "ImGuiGodot.Internal",
       "degree": 17
     },
     {
-      "id": "addons_imgui_godot_imguigodot_internal_canvasrenderer_imguigodot_internal_canvasrenderer",
-      "label": "CanvasRenderer",
-      "degree": 16
+      "id": "addons_imgui_godot_imguigodot_internal_backendnative_imguigodot_internal_backendnative",
+      "label": "BackendNative",
+      "degree": 17
     },
     {
       "id": "addons_imgui_godot_imguigodot_imguicontroller_imguigodot_imguicontroller",
       "label": "ImGuiController",
+      "degree": 16
+    },
+    {
+      "id": "addons_imgui_godot_imguigodot_internal_canvasrenderer_imguigodot_internal_canvasrenderer",
+      "label": "CanvasRenderer",
       "degree": 16
     },
     {
@@ -545,52 +520,19 @@
       "why": "bridges separate communities"
     },
     {
-      "source": "State",
-      "target": "Fonts",
+      "source": "DummyRenderer",
+      "target": "IRenderer",
       "source_files": [
-        "addons/imgui-godot/ImGuiGodot/Internal/State.cs",
-        "addons/imgui-godot/ImGuiGodot/Internal/Fonts.cs"
+        "addons/imgui-godot/ImGuiGodot/Internal/DummyRenderer.cs",
+        "addons/imgui-godot/ImGuiGodot/Internal/IRenderer.cs"
       ],
       "confidence": "EXTRACTED",
-      "relation": "references",
+      "relation": "implements",
       "why": "bridges separate communities"
     }
   ],
-  "questions": [
-    {
-      "type": "bridge_node",
-      "question": "Why does `ImGuiGodot.Internal` connect `ImGuiGodot.Internal` to `ImGuiGD`, `Input`, `GodotImGuiWindow`, `IRenderer`, `CanvasRenderer`, `BackendNet`, `DummyRenderer`?",
-      "why": "High betweenness centrality (0.318) - this node is a cross-community bridge."
-    },
-    {
-      "type": "bridge_node",
-      "question": "Why does `State` connect `State` to `ImGuiGodot.Internal`, `Input`, `Fonts`, `IRenderer`?",
-      "why": "High betweenness centrality (0.213) - this node is a cross-community bridge."
-    },
-    {
-      "type": "bridge_node",
-      "question": "Why does `ImGuiGD` connect `ImGuiGD` to `ImGuiGodot.Internal`, `BackendNative`, `.Image`?",
-      "why": "High betweenness centrality (0.149) - this node is a cross-community bridge."
-    },
-    {
-      "type": "isolated_nodes",
-      "question": "What connects `JoyAxisDeadZone`, `Scale`, `Visible` to the rest of the system?",
-      "why": "58 weakly-connected nodes found - possible documentation gaps or missing edges."
-    },
-    {
-      "type": "low_cohesion",
-      "question": "Should `ImGuiGD` be split into smaller, more focused modules?",
-      "why": "Cohesion score 0.07386363636363637 - nodes in this community are weakly interconnected."
-    },
-    {
-      "type": "low_cohesion",
-      "question": "Should `imgui-godot.h` be split into smaller, more focused modules?",
-      "why": "Cohesion score 0.09659090909090909 - nodes in this community are weakly interconnected."
-    },
-    {
-      "type": "low_cohesion",
-      "question": "Should `Input` be split into smaller, more focused modules?",
-      "why": "Cohesion score 0.10344827586206896 - nodes in this community are weakly interconnected."
-    }
-  ]
+  "tokens": {
+    "input": 0,
+    "output": 0
+  }
 }
