@@ -14,7 +14,7 @@ class PanelProbe extends "res://main.gd":
 		super.imgui_text_tooltip(title, tooltip)
 
 func _initialize() -> void:
-	create_timer(40.0).timeout.connect(func(): quit(1))
+	create_timer(40.0).timeout.connect(quit.bind(1))
 	call_deferred('_check_panel')
 
 func _frames(count := 3) -> void:
@@ -35,10 +35,19 @@ func _mouse(position: Vector2, pressed := false, button := 0) -> void:
 	root.push_input(event, true)
 
 func _check_panel() -> void:
+	if OS.get_cmdline_user_args().has('--startup-only'):
+		assert(Engine.is_embedded_in_editor(), 'Pass --headless --wid 1 to check embedded startup.')
+		var overlay = root.get_node('ImGuiRoot').get_child(1)
+		assert(overlay is CanvasLayer, 'Embedded startup must create the local input overlay automatically.')
+		assert(overlay.get_child(0) is SubViewportContainer)
+		assert(overlay.get_child(0).get_child(0) is SubViewport)
+		print('PASS: engine embedding detection and automatic viewport-local input startup.')
+		quit()
+		return
 	# Injected input must remain deterministic while other desktop apps have focus.
 	ImGui.GetIO().ConfigDebugIgnoreFocusLoss = true
 	Engine.max_fps = 60
-	if not OS.get_cmdline_args().has('--embedded'):
+	if not Engine.is_embedded_in_editor():
 		root.get_node('ImGuiRoot')._use_local_input()
 	var scene = load('res://main.tscn').instantiate()
 	scene.set_script(PanelProbe)
@@ -103,4 +112,6 @@ func _check_panel() -> void:
 	scene.camera._input(release)
 	assert(Input.get_mouse_mode() == Input.MOUSE_MODE_VISIBLE, 'Panel capture must not trap the cursor.')
 	print('PASS: embedded panel coordinates, repeated clicks, slider editing, and freecam input capture.')
+	scene.queue_free()
+	await _frames()
 	quit()

@@ -24,7 +24,7 @@ func _enter_tree():
             add_child(load(csharp_controller).new())
 
 func _ready():
-    if Engine.is_editor_hint() or not OS.get_cmdline_args().has("--embedded"):
+    if Engine.is_editor_hint() or not Engine.is_embedded_in_editor():
         return
     _use_local_input()
 
