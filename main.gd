@@ -7,7 +7,8 @@ const SEA_PRESETS := preload('res://assets/water/sea_presets.gd')
 @export_enum('Scene Defaults', 'Daylight Ocean') var sea_preset := 1
 @export_enum('Calm', 'Normal', 'Storm') var sea_state := 1
 
-var clipmap_tile_size := 1.0 # Not the smallest tile size, but one that reduces the amount of vertex jitter.
+# Sea of Thieves is the visual reference; this trades far-water coverage for denser close crests.
+var clipmap_tile_size := 0.5 # Keep mesh recentering aligned with the scaled clipmap.
 var previous_tile := Vector3i.MAX
 var should_render_imgui := not Engine.is_editor_hint()
 var _scene_preset : Dictionary
@@ -190,7 +191,7 @@ func _render_imgui() -> void:
 		for mesh_quality in len(water.MeshQuality):
 			if ImGui.Selectable('%s' % mesh_quality_keys[mesh_quality].capitalize()):
 				water.mesh_quality = mesh_quality
-				clipmap_tile_size = 1.0 if mesh_quality == water.MeshQuality.HIGH else 4.0
+				clipmap_tile_size = 0.5 if mesh_quality == water.MeshQuality.HIGH else 2.0
 		ImGui.EndCombo()
 	imgui_text_tooltip('Updates per Second:', 'Denotes how many times wave spectrums will be updated per second.\n(0 is uncapped)'); ImGui.SameLine(); if ImGui.SliderFloat('##update_rate', _updates_per_second, 0, 60): water.updates_per_second = _updates_per_second[0]
 	ImGui.Text('Water Color:       '); ImGui.SameLine(); if ImGui.ColorButtonEx('##water_color_button', water.water_color, ImGui.ColorEditFlags_Float, Vector2(ImGui.GetColumnWidth(), ImGui.GetFrameHeight())): ImGui.OpenPopup('water_color_picker')
