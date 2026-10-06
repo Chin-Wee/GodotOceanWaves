@@ -1,10 +1,12 @@
-[gd_resource type="ShaderMaterial" load_steps=2 format=4 uid="uid://byumtcccq4ew3"]
+[gd_resource type="ShaderMaterial" load_steps=3 format=4 uid="uid://byumtcccq4ew3"]
 
 [ext_resource type="Shader" path="res://assets/shaders/spatial/water.gdshader" id="1_uffek"]
+[ext_resource type="Texture2D" path="res://assets/water/sea_spray.png" id="2_foam_pattern"]
 
 [resource]
 render_priority = 1
 shader = ExtResource("1_uffek")
+shader_parameter/foam_pattern = ExtResource("2_foam_pattern")
 shader_parameter/roughness = 0.65
 shader_parameter/reflection_roughness = 0.4
 shader_parameter/crest_color = Color(0.219608, 0.729412, 0.760784, 1)

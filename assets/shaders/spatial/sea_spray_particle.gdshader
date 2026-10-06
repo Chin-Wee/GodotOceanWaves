@@ -26,6 +26,7 @@ uniform vec4 map_scales[MAX_CASCADES];               // Scales for displacement/
 global uniform uint num_cascades;
 global uniform sampler2DArray displacements;         // Each layer represents one wave cascade.
 global uniform sampler2DArray normals : hint_normal; // Each layer represents one wave cascade.
+global uniform sampler2DArray foam_states;            // G stores fresh breaking injection.
 
 // Source: https://www.shadertoy.com/view/Xt3cDn
 vec3 hash32(uvec2 p) {
@@ -77,16 +78,18 @@ void process() {
 	} else if (TIME >= START_TIME) {
 		if (HAS_STARTED == 0.0) { // Particle has just started according to its start time.
 			// --- PARTICLE INITIALIZATION ---
-			// Read foam and normal information from normal maps.
+			// Read surface shape from normal maps and fresh breaking only from foam state.
 			vec3 gradient = vec3(0);
-			for (uint i = 0U; i < num_cascades; ++i)
+			float fresh_foam = 0.0;
+			for (uint i = 0U; i < num_cascades; ++i) {
 				gradient += texture(normals, vec3(START_POS.xz*map_scales[i].xy, float(i))).xyw;
+				fresh_foam = max(fresh_foam, texture(foam_states, vec3(START_POS.xz*map_scales[i].xy, float(i))).g);
+			}
 			vec3 normal = normalize(vec3(-gradient.x, 1.0, -gradient.y));
-			float foam = gradient.z;
 			float normal_factor = mix(0.25, 1.0, min((normal.y - 0.92) / (0.99 - 0.92), 1.0)); // [0.92..0.99] -> [0.25..1]
-			float foam_factor = mix(0.25, 1.0, min((foam - 0.9) / (1.0 - 0.9), 1.0));          // [0.90..1.00] -> [0.25..1]
+			float foam_factor = smoothstep(0.15, 0.8, fresh_foam);
 
-			ACTIVE = normal_factor >= 0.0 && normal_factor <= 1.0 && foam > 0.9;
+			ACTIVE = normal_factor >= 0.0 && normal_factor <= 1.0 && fresh_foam > 0.15;
 			SCALE_FACTOR = normal_factor*foam_factor;
 			// Size of particle is based on foam amount and is flattened based on normal height.
 			PARTICLE_SCALE = vec3(foam_factor * (float(ACTIVE) + 1e-3));
