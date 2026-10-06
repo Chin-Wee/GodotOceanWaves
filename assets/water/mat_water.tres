@@ -1,12 +1,26 @@
-[gd_resource type="ShaderMaterial" load_steps=3 format=4 uid="uid://byumtcccq4ew3"]
+[gd_resource type="ShaderMaterial" load_steps=5 format=4 uid="uid://byumtcccq4ew3"]
 
 [ext_resource type="Shader" path="res://assets/shaders/spatial/water.gdshader" id="1_uffek"]
-[ext_resource type="Texture2D" path="res://assets/water/sea_spray.png" id="2_foam_pattern"]
+[ext_resource type="Texture2D" path="res://assets/water/sea_spray.png" id="2_foam_hf"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_foam_lf"]
+noise_type = 1
+seed = 263
+frequency = 0.015
+fractal_octaves = 3
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_foam_lf"]
+seamless = true
+seamless_blend_skirt = 0.2
+width = 256
+height = 256
+noise = SubResource("FastNoiseLite_foam_lf")
 
 [resource]
 render_priority = 1
 shader = ExtResource("1_uffek")
-shader_parameter/foam_pattern = ExtResource("2_foam_pattern")
+shader_parameter/foam_hf_pattern = ExtResource("2_foam_hf")
+shader_parameter/foam_lf_pattern = SubResource("NoiseTexture2D_foam_lf")
 shader_parameter/roughness = 0.65
 shader_parameter/reflection_roughness = 0.4
 shader_parameter/crest_color = Color(0.219608, 0.729412, 0.760784, 1)

@@ -18,9 +18,10 @@ uniform vec4 crest_color : source_color = vec4(0.219608, 0.729412, 0.760784, 1.0
 uniform float crest_scattering_strength : hint_range(0.0, 2.0) = 0.0;
 uniform float trough_light_strength : hint_range(0.0, 1.0) = 1.0; // Art-directed trough occlusion.
 uniform float normal_strength : hint_range(0.0, 1.0) = 1.0; // Global normal strength
-uniform sampler2D foam_pattern : source_color, repeat_enable;
+uniform sampler2D foam_hf_pattern : source_color, repeat_enable;
+uniform sampler2D foam_lf_pattern : repeat_enable;
 uniform float foam_hf_scale : hint_range(0.01, 1.0) = 0.28;
-uniform float foam_lf_scale : hint_range(0.001, 0.1) = 0.045;
+uniform float foam_lf_scale : hint_range(0.001, 0.1) = 0.02;
 uniform float sun_angular_radius : hint_range(0.0, 0.2) = 0.04;
 
 group_uniforms cascade_data;
@@ -99,8 +100,8 @@ void fragment() {
 		foam_state = max(foam_state, state);
 	}
 	float freshness = clamp(foam_state.y / max(foam_state.x, 1e-4), 0.0, 1.0);
-	float foam_hf = texture(foam_pattern, UV*foam_hf_scale).a;
-	float foam_lf = texture(foam_pattern, UV*foam_lf_scale).a;
+	float foam_hf = texture(foam_hf_pattern, UV*foam_hf_scale).a;
+	float foam_lf = smoothstep(0.2, 0.8, texture(foam_lf_pattern, UV*foam_lf_scale).r);
 	// The parity sheet's age model keeps fresh foam detailed and lets aged foam broaden.
 	float breakup = mix(foam_lf, foam_hf, smoothstep(0.05, 0.85, freshness));
 	foam_factor = smoothstep(0.05, 0.95, foam_state.x * mix(0.5, 1.0, breakup));
