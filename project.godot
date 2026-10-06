@@ -91,3 +91,19 @@ planar_reflection={
 "type": "sampler2D",
 "value": ""
 }
+interaction_foam_texture={
+"type": "sampler2D",
+"value": ""
+}
+interaction_foam_center={
+"type": "vec2",
+"value": Vector2(0, 0)
+}
+interaction_foam_extent={
+"type": "float",
+"value": 256.0
+}
+interaction_foam_strength={
+"type": "float",
+"value": 1.0
+}
