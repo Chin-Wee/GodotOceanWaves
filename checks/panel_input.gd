@@ -35,6 +35,9 @@ func _mouse(position: Vector2, pressed := false, button := 0) -> void:
 	root.push_input(event, true)
 
 func _check_panel() -> void:
+	# Injected input must remain deterministic while other desktop apps have focus.
+	ImGui.GetIO().ConfigDebugIgnoreFocusLoss = true
+	Engine.max_fps = 60
 	if not OS.get_cmdline_args().has('--embedded'):
 		root.get_node('ImGuiRoot')._use_local_input()
 	var scene = load('res://main.tscn').instantiate()
