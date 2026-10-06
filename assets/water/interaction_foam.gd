@@ -8,6 +8,9 @@ extends Node
 
 const DEPTH_SHADER := preload('res://assets/shaders/spatial/interaction_depth.gdshader')
 const HISTORY_SHADER := preload('res://assets/shaders/canvas/interaction_history.gdshader')
+const TOP_DOWN_PASS_LAYER := 1 << 18
+const SUBMERGED_PASS_LAYER := 1 << 19
+const CAPTURE_PASS_LAYERS := TOP_DOWN_PASS_LAYER | SUBMERGED_PASS_LAYER
 
 @export var camera_path: NodePath = ^'../Camera'
 @export var water_path: NodePath = ^'../Water'
@@ -40,6 +43,8 @@ func _ready() -> void:
 	# Reserve layer 2 for water and spray; default-layer hulls and islands enter the depth source.
 	# ponytail: only nearest opaque surfaces are captured; dedicated hull layers if deck occlusion matters.
 	water.layers = 2
+	# The depth quads share this World3D; keep their clip-space geometry out of scene cameras.
+	camera.cull_mask &= ~CAPTURE_PASS_LAYERS
 	var spray := water.get_node_or_null('WaterSprayEmitter') as GeometryInstance3D
 	if spray:
 		spray.layers = 2
@@ -102,6 +107,7 @@ func _make_top_down_viewport() -> void:
 	var quad := MeshInstance3D.new()
 	quad.name = 'TopDownContactPass'
 	quad.mesh = QuadMesh.new()
+	quad.layers = TOP_DOWN_PASS_LAYER
 	quad.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	quad.extra_cull_margin = 100000.0
 	top_down_material = ShaderMaterial.new()
@@ -125,6 +131,7 @@ func _make_top_down_viewport() -> void:
 	var submerged_quad := MeshInstance3D.new()
 	submerged_quad.name = 'SubmergedContactPass'
 	submerged_quad.mesh = QuadMesh.new()
+	submerged_quad.layers = SUBMERGED_PASS_LAYER
 	submerged_quad.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	submerged_quad.extra_cull_margin = 100000.0
 	submerged_material = ShaderMaterial.new()
@@ -171,7 +178,8 @@ func _sync_camera() -> void:
 	top_down_camera.size = top_down_extent * 2.0
 	top_down_camera.near = 0.1
 	top_down_camera.far = 1024.0
-	top_down_camera.cull_mask = camera.cull_mask & ~water.layers
+	var scene_layers := camera.cull_mask & ~water.layers & ~CAPTURE_PASS_LAYERS
+	top_down_camera.cull_mask = scene_layers | TOP_DOWN_PASS_LAYER
 	submerged_camera.global_transform = Transform3D(
 		Basis.from_euler(Vector3(PI * 0.5, 0.0, 0.0)),
 		Vector3(camera.global_position.x, water.global_position.y - 512.0, camera.global_position.z)
@@ -179,7 +187,7 @@ func _sync_camera() -> void:
 	submerged_camera.size = top_down_extent * 2.0
 	submerged_camera.near = 0.1
 	submerged_camera.far = 1024.0
-	submerged_camera.cull_mask = camera.cull_mask & ~water.layers
+	submerged_camera.cull_mask = scene_layers | SUBMERGED_PASS_LAYER
 
 func _exit_tree() -> void:
 	var image := Image.create(1, 1, false, Image.FORMAT_RGBA8)
