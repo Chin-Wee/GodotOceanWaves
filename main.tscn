@@ -13,6 +13,7 @@
 [ext_resource type="Material" uid="uid://5xqyddws6rt5" path="res://assets/water/mat_spray.tres" id="9_skbf4"]
 [ext_resource type="Texture2D" uid="uid://dtm5tyuh2slqt" path="res://assets/water/sea_spray.png" id="10_spqpo"]
 [ext_resource type="Script" path="res://assets/water/planar_reflection.gd" id="11_reflection"]
+[ext_resource type="Script" path="res://assets/water/interaction_foam.gd" id="12_interaction"]
 
 [sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_t7jwl"]
 panorama = ExtResource("3_0ksgj")
@@ -128,6 +129,8 @@ draw_pass_1 = SubResource("QuadMesh_06d3e")
 
 [node name="PlanarReflection" type="Node" parent="."]
 script = ExtResource("11_reflection")
+[node name="InteractionFoam" type="Node" parent="."]
+script = ExtResource("12_interaction")
 
 [node name="FogVolume" type="FogVolume" parent="." unique_id=519569375]
 shape = 4
