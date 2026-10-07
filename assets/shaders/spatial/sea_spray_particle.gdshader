@@ -20,6 +20,7 @@ uniform uint num_particles;
 uniform vec3 particle_scale;
 uniform float lifetime = 3.0; // Actual lifetime of a particle.
 uniform float lifetime_randomness : hint_range(0.0, 1.0) = 0.25;
+uniform vec2 wind_velocity = vec2(0.0);
 
 group_uniforms cascade_data;
 uniform vec4 map_scales[MAX_CASCADES];               // Scales for displacement/normal maps. Packed: [uv scale, displacement scale, normal scale]
@@ -86,6 +87,7 @@ void process() {
 				fresh_foam = max(fresh_foam, texture(foam_states, vec3(START_POS.xz*map_scales[i].xy, float(i))).g);
 			}
 			vec3 normal = normalize(vec3(-gradient.x, 1.0, -gradient.y));
+			USERDATA3.xy = normal.xz;
 			float normal_factor = mix(0.25, 1.0, min((normal.y - 0.92) / (0.99 - 0.92), 1.0)); // [0.92..0.99] -> [0.25..1]
 			float foam_factor = smoothstep(0.15, 0.8, fresh_foam);
 
@@ -116,6 +118,9 @@ void process() {
 			// The particle will follow a parabolic trajectory vertically w.r.t. the displacement height
 			// so that it rises and sinks in to the ground over its lifetime.
 			displacement += vec3(0, -5.0*pow(2.5*t - 0.45, 2.0)*SCALE_FACTOR + 0.5, 0);
+			// Sea of Thieves crest spray lifts along the local slope and drifts with configured wind.
+			vec3 surface_normal = normalize(vec3(USERDATA3.x, sqrt(max(0.0, 1.0 - dot(USERDATA3.xy, USERDATA3.xy))), USERDATA3.y));
+			displacement += (surface_normal * 1.5 + vec3(wind_velocity.x, 0.0, wind_velocity.y) * 0.12) * PARTICLE_LIFETIME * t;
 			POSITION = START_POS + displacement;
 
 			// --- PARTICLE SCALE SHAPING ---

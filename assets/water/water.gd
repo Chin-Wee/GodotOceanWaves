@@ -61,6 +61,7 @@ var wave_generator : WaveGenerator :
 var rng = RandomNumberGenerator.new()
 var time := 0.0
 var next_update_time := 0.0
+var _spray_wind_velocity := Vector2.ZERO
 
 var displacement_maps := Texture2DArrayRD.new()
 var normal_maps := Texture2DArrayRD.new()
@@ -73,6 +74,7 @@ func _ready() -> void:
 	RenderingServer.global_shader_parameter_set(&'foam_color', foam_color.srgb_to_linear())
 
 func _process(delta : float) -> void:
+	_update_spray_wind()
 	# Update waves once every 1.0/updates_per_second.
 	if updates_per_second == 0 or time >= next_update_time:
 		var target_update_delta := 1.0 / (updates_per_second + 1e-10)
@@ -80,6 +82,18 @@ func _process(delta : float) -> void:
 		next_update_time = time + target_update_delta
 		_update_water(update_delta)
 	time += delta
+
+func _update_spray_wind() -> void:
+	var wind_velocity := Vector2.ZERO
+	var total_weight := 0.0
+	for params: WaveCascadeParameters in parameters:
+		var weight := params.foam_amount * params.displacement_scale
+		wind_velocity += Vector2(sin(deg_to_rad(params.wind_direction)), cos(deg_to_rad(params.wind_direction))) * params.wind_speed * weight
+		total_weight += weight
+	if total_weight > 0.0: wind_velocity /= total_weight
+	if not wind_velocity.is_equal_approx(_spray_wind_velocity):
+		_spray_wind_velocity = wind_velocity
+		SPRAY_MAT.set_shader_parameter(&'wind_velocity', wind_velocity)
 
 func _setup_wave_generator() -> void:
 	if parameters.size() <= 0: return
