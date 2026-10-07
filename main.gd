@@ -5,12 +5,12 @@ const SEA_PRESETS := preload('res://assets/water/sea_presets.gd')
 
 ## Applied when running the scene. Runtime sliders can still override the preset.
 @export_enum('Scene Defaults', 'Daylight Ocean') var sea_preset := 1
-@export_enum('Calm', 'Normal', 'Storm') var sea_state := 1
+@export_enum('Calm', 'Normal', 'Storm') var sea_state := 2
 
 # Sea of Thieves is the visual reference; this trades far-water coverage for denser close crests.
 var clipmap_tile_size := 0.5 # Keep mesh recentering aligned with the scaled clipmap.
-var clipmap_scale := 0.5
-var _clipmap_scale := [0.5]
+var clipmap_scale := 0.052
+var _clipmap_scale := [0.052]
 var _spray_emitter_base_scale := Vector3.ONE
 var previous_tile := Vector3i.MAX
 var should_render_imgui := not Engine.is_editor_hint()
