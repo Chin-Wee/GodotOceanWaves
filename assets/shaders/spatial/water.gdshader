@@ -37,6 +37,8 @@ global uniform float interaction_foam_extent;
 global uniform float interaction_foam_strength;
 // --- Planar reflection / Snell's window (Sea of Thieves, SIGGRAPH 2018) ---
 global uniform sampler2D planar_reflection;
+global uniform sampler2D underwater_reflection;
+uniform mat3 tir_view_rotation = mat3(1.0);
 uniform float reflection_distortion : hint_range(0.0, 0.1) = 0.025;
 uniform float water_ior : hint_range(1.0, 1.5) = 1.333;
 uniform vec3 underwater_absorption = vec3(0.15, 0.06, 0.03);
@@ -148,9 +150,15 @@ void fragment() {
 		vec2 refracted_uv = projected.xy / max(projected.w, 1e-5) * vec2(0.5, -0.5) + vec2(0.5);
 		refracted_uv += gradient.xy * reflection_distortion;
 		vec3 transmitted = texture(planar_reflection, clamp(refracted_uv, vec2(0.001), vec2(0.999))).rgb;
+		vec3 reflected_view = reflect(incident, outward_normal);
+		vec4 tir_projected = PROJECTION_MATRIX * vec4(tir_view_rotation * reflected_view, 0.0);
+		vec2 tir_uv = tir_projected.xy / max(tir_projected.w, 1e-5) * vec2(0.5, -0.5) + vec2(0.5);
+		tir_uv += gradient.xy * reflection_distortion;
+		vec3 reflected = texture(underwater_reflection, clamp(tir_uv, vec2(0.001), vec2(0.999))).rgb;
 		vec3 transmittance = exp(-underwater_absorption * camera_depth);
 		vec3 absorbed = transmitted * transmittance + underwater_fog_color.rgb * (1.0 - transmittance);
-		EMISSION = snell_k < 0.0 ? underwater_fog_color.rgb : mix(absorbed, water_color.rgb, fresnel);
+		vec3 absorbed_reflection = reflected * transmittance + underwater_fog_color.rgb * (1.0 - transmittance);
+		EMISSION = snell_k < 0.0 ? absorbed_reflection : mix(absorbed, water_color.rgb, fresnel);
 		ALBEDO = vec3(1e-4);
 		trough_visibility = 1.0;
 		ROUGHNESS = 1.0;

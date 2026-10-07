@@ -91,6 +91,10 @@ planar_reflection={
 "type": "sampler2D",
 "value": ""
 }
+underwater_reflection={
+"type": "sampler2D",
+"value": ""
+}
 interaction_foam_texture={
 "type": "sampler2D",
 "value": ""

@@ -7,13 +7,17 @@ const CAPTURE_SCALE := 0.5
 const REFLECTION_CLIP_SHADER := preload('res://assets/shaders/spatial/reflection_clip.gdshader')
 
 @onready var source_camera := get_node("../Camera") as Camera3D
-@onready var water := get_node("../Water") as VisualInstance3D
+@onready var water := get_node("../Water") as MeshInstance3D
 
 var capture_viewport: SubViewport
 var capture_camera: Camera3D
+var underwater_viewport: SubViewport
+var underwater_camera: Camera3D
 var sky_viewport: SubViewport
 var sky_camera: Camera3D
 var clip_material: ShaderMaterial
+var underwater_clip_material: ShaderMaterial
+var water_material: ShaderMaterial
 
 static func reflected_transform(source: Transform3D, plane_y: float) -> Transform3D:
 	var basis := source.basis.orthonormalized()
@@ -27,9 +31,20 @@ static func reflected_transform(source: Transform3D, plane_y: float) -> Transfor
 static func snell_discriminant(cos_incident: float, water_ior: float = 1.333) -> float:
 	return 1.0 - water_ior * water_ior * (1.0 - cos_incident * cos_incident)
 
+static func tir_transform(source: Transform3D, plane_y: float) -> Transform3D:
+	# Mirror the virtual camera across the interface while flipping local X to keep its basis right-handed.
+	var basis := source.basis.orthonormalized()
+	var reflected_basis := Basis(
+		Vector3(-basis.x.x, basis.x.y, -basis.x.z),
+		Vector3(basis.y.x, -basis.y.y, basis.y.z),
+		Vector3(basis.z.x, -basis.z.y, basis.z.z)
+	)
+	return Transform3D(reflected_basis, Vector3(source.origin.x, 2.0 * plane_y - source.origin.y, source.origin.z))
+
 func _ready() -> void:
 	# The main camera includes layer 2; the capture camera excludes water and submerged visuals on it.
 	_set_capture_excluded_layer(water)
+	water_material = water.material_override as ShaderMaterial
 	source_camera.cull_mask |= CAPTURE_EXCLUDED_LAYER
 	source_camera.cull_mask &= ~REFLECTION_CLIP_LAYER
 
@@ -58,6 +73,29 @@ func _ready() -> void:
 	clip_quad.material_override = clip_material
 	capture_camera.add_child(clip_quad)
 
+	underwater_viewport = SubViewport.new()
+	underwater_viewport.name = 'UnderwaterReflectionViewport'
+	underwater_viewport.world_3d = get_viewport().world_3d
+	underwater_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
+	add_child(underwater_viewport)
+	underwater_camera = Camera3D.new()
+	underwater_camera.name = 'UnderwaterReflectionCamera'
+	underwater_camera.current = true
+	underwater_camera.cull_mask = (source_camera.cull_mask & ~CAPTURE_EXCLUDED_LAYER) | REFLECTION_CLIP_LAYER
+	underwater_viewport.add_child(underwater_camera)
+	var underwater_clip_quad := MeshInstance3D.new()
+	underwater_clip_quad.name = 'UnderwaterWaterlineClipPass'
+	underwater_clip_quad.mesh = clip_mesh
+	underwater_clip_quad.layers = REFLECTION_CLIP_LAYER
+	underwater_clip_quad.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	underwater_clip_quad.extra_cull_margin = 100000.0
+	underwater_clip_material = ShaderMaterial.new()
+	underwater_clip_material.shader = REFLECTION_CLIP_SHADER
+	underwater_clip_material.render_priority = 127
+	underwater_clip_material.set_shader_parameter(&'clip_above_water', true)
+	underwater_clip_quad.material_override = underwater_clip_material
+	underwater_camera.add_child(underwater_clip_quad)
+
 	# Matching sky-only capture gives clipped pixels the same camera's clear-sky view.
 	# ponytail: clipped pixels cannot reveal another object behind them; per-material clipping is the upgrade for that overlap.
 	sky_viewport = SubViewport.new()
@@ -72,21 +110,30 @@ func _ready() -> void:
 	sky_viewport.add_child(sky_camera)
 	clip_material.set_shader_parameter(&'sky_texture', sky_viewport.get_texture())
 	RenderingServer.global_shader_parameter_set(&"planar_reflection", capture_viewport.get_texture())
+	RenderingServer.global_shader_parameter_set(&"underwater_reflection", underwater_viewport.get_texture())
 
 func _process(_delta: float) -> void:
 	# InteractionFoam removes its capture layers after this node's _ready has built the camera.
 	var capture_mask := (source_camera.cull_mask & ~CAPTURE_EXCLUDED_LAYER) | REFLECTION_CLIP_LAYER
 	if capture_camera.cull_mask != capture_mask:
 		capture_camera.cull_mask = capture_mask
+	underwater_camera.cull_mask = capture_mask
 	_update_capture_size()
 	_copy_camera_projection(capture_camera)
+	_copy_camera_projection(underwater_camera)
 	var plane_y := water.global_position.y
 	clip_material.set_shader_parameter(&'waterline', plane_y)
-	if source_camera.global_position.y < plane_y:
+	underwater_clip_material.set_shader_parameter(&'waterline', plane_y)
+	var is_underwater := source_camera.global_position.y < plane_y
+	underwater_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS if is_underwater else SubViewport.UPDATE_DISABLED
+	if is_underwater:
 		# From underwater, capture the above-water view for the refracted Snell cone.
 		capture_camera.global_transform = source_camera.global_transform
+		underwater_camera.global_transform = tir_transform(source_camera.global_transform, plane_y)
 	else:
 		capture_camera.global_transform = reflected_transform(source_camera.global_transform, plane_y)
+		underwater_camera.global_transform = source_camera.global_transform
+	water_material.set_shader_parameter(&'tir_view_rotation', underwater_camera.global_basis.inverse() * source_camera.global_basis)
 	sky_camera.global_transform = capture_camera.global_transform
 	_copy_camera_projection(sky_camera)
 
@@ -95,6 +142,7 @@ func _update_capture_size() -> void:
 	var target_size := Vector2i(maxi(2, int(visible_size.x * CAPTURE_SCALE)), maxi(2, int(visible_size.y * CAPTURE_SCALE)))
 	if capture_viewport.size != target_size:
 		capture_viewport.size = target_size
+		underwater_viewport.size = target_size
 		sky_viewport.size = target_size
 
 func _copy_camera_projection(target: Camera3D) -> void:
@@ -119,3 +167,4 @@ func _exit_tree() -> void:
 	var image := Image.create(1, 1, false, Image.FORMAT_RGBA8)
 	image.fill(Color.BLACK)
 	RenderingServer.global_shader_parameter_set(&"planar_reflection", ImageTexture.create_from_image(image))
+	RenderingServer.global_shader_parameter_set(&"underwater_reflection", ImageTexture.create_from_image(image))

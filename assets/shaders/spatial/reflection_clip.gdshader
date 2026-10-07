@@ -5,6 +5,8 @@ uniform sampler2D scene_color : hint_screen_texture, repeat_disable, filter_near
 uniform sampler2D scene_depth : hint_depth_texture, repeat_disable, filter_nearest;
 uniform sampler2D sky_texture : repeat_disable, filter_nearest;
 uniform float waterline = 0.0;
+uniform bool clip_above_water = false;
+uniform vec4 clip_color : source_color = vec4(0.015, 0.075, 0.095, 1.0);
 
 void vertex() {
 	POSITION = vec4(VERTEX.xy, 1.0, 1.0);
@@ -21,10 +23,14 @@ void fragment() {
 	#else
 	has_geometry = depth > 0.00001;
 	#endif
+	if (!has_geometry && clip_above_water) {
+		color = clip_color.rgb;
+	}
 	if (has_geometry) {
 		vec4 world = INV_VIEW_MATRIX * INV_PROJECTION_MATRIX * vec4(ndc, 1.0);
-		if (world.y / world.w < waterline) {
-			color = texture(sky_texture, SCREEN_UV).rgb;
+		bool clipped = clip_above_water ? world.y / world.w > waterline : world.y / world.w < waterline;
+		if (clipped) {
+			color = clip_above_water ? clip_color.rgb : texture(sky_texture, SCREEN_UV).rgb;
 		}
 	}
 	ALBEDO = color;
