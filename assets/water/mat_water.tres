@@ -1,7 +1,9 @@
-[gd_resource type="ShaderMaterial" load_steps=5 format=4 uid="uid://byumtcccq4ew3"]
+[gd_resource type="ShaderMaterial" load_steps=7 format=4 uid="uid://byumtcccq4ew3"]
 
 [ext_resource type="Shader" path="res://assets/shaders/spatial/water.gdshader" id="1_uffek"]
 [ext_resource type="Texture2D" path="res://assets/water/sea_spray.png" id="2_foam_hf"]
+[ext_resource type="Texture2D" path="res://assets/water/foam_breakup_mid.png" id="3_foam_mid"]
+[ext_resource type="Texture2D" path="res://assets/water/foam_breakup_broad.png" id="4_foam_broad"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_foam_lf"]
 noise_type = 1
@@ -20,6 +22,8 @@ noise = SubResource("FastNoiseLite_foam_lf")
 render_priority = 1
 shader = ExtResource("1_uffek")
 shader_parameter/foam_hf_pattern = ExtResource("2_foam_hf")
+shader_parameter/foam_mid_pattern = ExtResource("3_foam_mid")
+shader_parameter/foam_broad_pattern = ExtResource("4_foam_broad")
 shader_parameter/foam_lf_pattern = SubResource("NoiseTexture2D_foam_lf")
 shader_parameter/foam_texture_blend = 1.0
 shader_parameter/roughness = 0.65

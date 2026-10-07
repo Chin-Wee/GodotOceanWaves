@@ -19,6 +19,8 @@ uniform float crest_scattering_strength : hint_range(0.0, 2.0) = 0.0;
 uniform float trough_light_strength : hint_range(0.0, 1.0) = 1.0; // Art-directed trough occlusion.
 uniform float normal_strength : hint_range(0.0, 1.0) = 1.0; // Global normal strength
 uniform sampler2D foam_hf_pattern : source_color, repeat_enable;
+uniform sampler2D foam_mid_pattern : repeat_enable;
+uniform sampler2D foam_broad_pattern : repeat_enable;
 uniform sampler2D foam_lf_pattern : repeat_enable;
 uniform float foam_texture_blend : hint_range(0.0, 1.0) = 1.0;
 uniform float foam_hf_scale : hint_range(0.01, 1.0) = 0.28;
@@ -117,7 +119,11 @@ void fragment() {
 		foam_state = max(foam_state, state);
 	}
 	float freshness = clamp(foam_state.y / max(foam_state.x, 1e-4), 0.0, 1.0);
-	float foam_hf = smoothstep(0.42, 0.82, texture(foam_hf_pattern, UV*foam_hf_scale).a);
+	// Three authored masks break up the fresh Jacobian coverage at distinct world-space scales.
+	float foam_spray = texture(foam_hf_pattern, UV*foam_hf_scale).a;
+	float foam_mid = texture(foam_mid_pattern, UV*(foam_hf_scale*0.5)).r;
+	float foam_broad = texture(foam_broad_pattern, UV*(foam_hf_scale*0.2)).r;
+	float foam_hf = smoothstep(0.42, 0.82, foam_spray*0.55 + foam_mid*0.3 + foam_broad*0.15);
 	float foam_lf = smoothstep(0.2, 0.8, texture(foam_lf_pattern, UV*foam_lf_scale).r);
 	// The parity sheet's age model keeps fresh foam detailed and lets aged foam broaden.
 	float age_blend = smoothstep(0.05, 0.85, freshness) * clamp(foam_texture_blend, 0.0, 1.0);
