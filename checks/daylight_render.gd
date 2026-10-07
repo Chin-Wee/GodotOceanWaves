@@ -49,14 +49,14 @@ func _capture(scene : Node3D, matching_camera : Transform3D) -> void:
 		spray.use_fixed_seed = true
 		spray.seed = 1234
 		spray.restart()
-		for step in 400:
-			# Exact 50 Hz simulation, completing all three cascades before the next frame.
-			water._update_water(0.02)
+		for step in 480:
+			# Exact 60 Hz simulation, completing all three cascades before the next frame.
+			water._update_water(1.0/60.0)
 			for cascade in 3: water.wave_generator._process(0.0)
 			await process_frame
-			if step + 1 in [200, 300, 400]:
+			if step + 1 in [240, 360, 480]:
 				var prefix := 'original' if index == 0 else 'daylight'
-				await _save(prefix + '-' + str((step + 1)/50))
+				await _save(prefix + '-' + str((step + 1)/60))
 				# Diagnostic only: display existing foam alpha without lighting or grading.
 				var shader : Shader = water.material_override.shader
 				var mask_shader := Shader.new()
@@ -65,8 +65,8 @@ func _capture(scene : Node3D, matching_camera : Transform3D) -> void:
 				var grading : bool = scene.get_node('Environment').environment.adjustment_enabled
 				scene.get_node('Environment').environment.adjustment_enabled = false
 				spray.visible = false
-				var mask : Image = await _save(prefix + '-foam-' + str((step + 1)/50))
-				if index == 1 and step + 1 == 200: await _check_freecam_look(scene, mask)
+				var mask : Image = await _save(prefix + '-foam-' + str((step + 1)/60))
+				if index == 1 and step + 1 == 240: await _check_freecam_look(scene, mask)
 				water.material_override.shader = shader
 				scene.get_node('Environment').environment.adjustment_enabled = grading
 				spray.visible = true
@@ -164,9 +164,9 @@ func _run() -> void:
 	scene.camera.set_process(false)
 	var matching_camera : Transform3D = scene.camera.transform
 	assert(scene.water.map_size == 1024 and scene.water.mesh_quality == 1)
-	assert(scene.water.updates_per_second == 50.0)
+	assert(scene.water.updates_per_second == 60.0)
 	assert(scene.get_node('Water/WaterSprayEmitter').amount == 32768)
-	print('VALIDATION: 1920x1080; FFT 1024; High mesh; 50 Hz; 32768 particles; seed 1234; camera ', matching_camera)
+	print('VALIDATION: 1920x1080; FFT 1024; High mesh; 60 Hz; 32768 particles; seed 1234; camera ', matching_camera)
 	if OS.get_cmdline_user_args().has('--capture'):
 		await _capture(scene, matching_camera)
 	else:

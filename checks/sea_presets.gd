@@ -15,6 +15,7 @@ func _make_scene(initial_preset := 0) -> Node3D:
 	scene.get_node('Water/WaterSprayEmitter').process_material.set_shader_parameter('num_particles', 256)
 	for audio in ['OceanAudioPlayer', 'WindAudioPlayer']: scene.get_node(audio).autoplay = false
 	root.add_child(scene)
+	assert(scene.sea_state == 2, 'Daylight default must start in Storm state')
 	return scene
 
 func _matches(actual : Variant, expected : Variant) -> bool:
@@ -22,13 +23,23 @@ func _matches(actual : Variant, expected : Variant) -> bool:
 	if expected is Color or expected is Vector3: return actual.is_equal_approx(expected)
 	return actual == expected
 
-func _check_preset(scene : Node3D, index : int) -> bool:
+func _check_preset(scene : Node3D, index : int, expected_state : int) -> bool:
 	var preset : Dictionary = scene.SEA_PRESETS.PRESETS[index - 1]
+	var state : Dictionary = scene.SEA_PRESETS.SEA_STATES[scene.sea_state]
+	var normal : Dictionary = scene.SEA_PRESETS.SEA_STATES[1]
 	var water : MeshInstance3D = scene.get_node('Water')
 	assert(water.parameters.size() == preset.cascades.size())
 	for i in preset.cascades.size():
 		for property in preset.cascades[i]:
-			assert(water.parameters[i].get(property) == preset.cascades[i][property], property)
+			var expected : Variant = preset.cascades[i][property]
+			match property:
+				'displacement_scale': expected *= state.wave_amplitude_scale
+				'choppiness': expected *= state.choppiness_scale
+				'foam_amount': expected *= state.foam_amount / normal.foam_amount
+				'whitecap': expected = clampf(expected + state.whitecap - normal.whitecap, 0.0, 2.0)
+				'foam_decay': expected = state.foam_decay
+				'foam_dispersion': expected = state.foam_dispersion
+			assert(_matches(water.parameters[i].get(property), expected), property)
 		assert(is_equal_approx(water.parameters[i]._wind_direction[0], deg_to_rad(water.parameters[i].wind_direction)))
 		assert(water.parameters[i]._tile_length == [water.parameters[i].tile_length.x, water.parameters[i].tile_length.y])
 		assert(water.parameters[i]._choppiness == [water.parameters[i].choppiness])
@@ -61,8 +72,18 @@ func _check_preset(scene : Node3D, index : int) -> bool:
 	assert(water.map_size == 128 and water.mesh_quality == 0 and water.updates_per_second == 30.0)
 	assert(scene.get_node('Water/WaterSprayEmitter').amount == 256)
 	assert(not scene.get_node('FogVolume').visible)
-	assert(scene.sea_state == 1)
-	assert(_matches(water.material_override.get_shader_parameter('foam_texture_blend'), scene.SEA_PRESETS.SEA_STATES[1].foam_texture_blend))
+	assert(scene.sea_state == expected_state)
+	assert(_matches(water.material_override.get_shader_parameter('foam_texture_blend'), state.foam_texture_blend))
+	if expected_state == 2:
+		var first_cascade : WaveCascadeParameters = water.parameters[0]
+		assert(first_cascade.tile_length == Vector2(88, 88))
+		assert(is_equal_approx(first_cascade.displacement_scale, 0.844))
+		assert(is_equal_approx(first_cascade.choppiness, 0.927))
+		assert(is_equal_approx(first_cascade.normal_scale, 0.385))
+		assert(is_equal_approx(first_cascade.foam_amount, 8.0))
+		assert(is_equal_approx(first_cascade.whitecap, 0.65))
+		assert(is_equal_approx(first_cascade.foam_decay, 3.325))
+		assert(is_equal_approx(first_cascade.foam_dispersion, 5.260))
 	return true
 
 func _check_sea_states(scene: Node3D) -> void:
@@ -133,12 +154,14 @@ func _check_restoration(scene : Node3D) -> bool:
 
 func _run() -> void:
 	var scene := _make_scene()
+	var expected_state : int = scene.sea_state
 	var seeds : Array = []
 	for params in scene.water.parameters: seeds.append(params.spectrum_seed)
 	for repetition in 3:
 		scene._apply_sea_preset(1)
-		assert(_check_preset(scene, 1))
+		assert(_check_preset(scene, 1, expected_state))
 		_check_sea_states(scene)
+		expected_state = scene.sea_state
 		for i in seeds.size():
 			assert(scene.water.parameters[i].spectrum_seed == seeds[i])
 			assert(is_equal_approx(scene.water.parameters[i].time, 120.0 + PI*i))
@@ -151,7 +174,7 @@ func _run() -> void:
 	scene.queue_free()
 	for frame in 3: await process_frame
 	scene = _make_scene(-1)
-	assert(_check_preset(scene, 1))
+	assert(_check_preset(scene, 1, 2))
 	for frame in 12: await process_frame
 	print('PASS: Daylight startup; original FFT/mesh/cadence/particle settings preserved')
 	var generator : WaveGenerator = scene.water.wave_generator
