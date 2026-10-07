@@ -219,7 +219,7 @@ void light() {
 	// --- DIFFUSE ---
 	const vec3 sss_modifier = vec3(0.9,1.15,0.85); // Subsurface scattering produces a 'greener' color.
 	// Broaden the backscatter lobe so its color blend reads across crests, not only at the peak angle.
-	float sun_scatter = pow(clamp(dot(LIGHT, -VIEW), 0.0, 1.0), 2.0) * pow(clamp(0.5 - 0.5 * dot(LIGHT, NORMAL), 0.0, 1.0), 2.0);
+	float sun_scatter = clamp(dot(LIGHT, -VIEW), 0.0, 1.0) * clamp(0.5 - 0.5 * dot(LIGHT, NORMAL), 0.0, 1.0);
 	float sss_near = 0.5*pow(dot_nv, 2.0);
 	float lambertian = 0.5*dot_nl;
 	// Sea of Thieves blends deep and subsurface water color using view, sun, and the FFT choppiness peak mask.
