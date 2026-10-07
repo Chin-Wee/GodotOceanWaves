@@ -65,6 +65,16 @@ func _run() -> void:
 	assert(_sample(submerged_image, submerged_source_uv) > 0.5, 'Upward depth source must mark the visible submerged hull underside.')
 	assert(_sample(history_image, source_uv) > 0.25, 'History buffer must align the underside contact into shared world-plane UVs.')
 
+	# Move the hull through the camera-centered source and verify it leaves a persistent trail.
+	for frame in 40:
+		target.position.x += 0.15
+		await process_frame
+	var trail_image := await _read_texture(interaction.history_viewports[interaction._write_index ^ 1])
+	var trail_uv := Vector2(0.78125, 0.625) # world (9, -21), behind the hull at x=12
+	var moving_hull_uv := Vector2(0.875, 0.625) # world (12, -21)
+	assert(_sample(trail_image, trail_uv) > 0.1, 'A moving hull must leave persistent foam along its path.')
+	assert(_sample(trail_image, moving_hull_uv) > 0.25, 'The current hull contact must remain foamed.')
+
 	# Remove the source, move the window, and verify that history follows the fixed world point.
 	target.queue_free()
 	camera.global_position.x = 8.0
@@ -74,5 +84,5 @@ func _run() -> void:
 	var moved_image := await _read_texture(interaction.history_viewports[interaction._write_index ^ 1])
 	var moved_uv := Vector2(0.4375, 0.5)
 	assert(_sample(moved_image, moved_uv) > 0.1, 'History must remain aligned after the camera-centered window moves.')
-	print('PASS: above-water deck rejection, submerged underside contact, shared world-plane UV alignment, and camera-window trail persistence.')
+	print('PASS: deck rejection, submerged hull contact, moving-hull trail persistence, world-plane alignment, and camera-window persistence.')
 	quit()
