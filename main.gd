@@ -9,6 +9,9 @@ const SEA_PRESETS := preload('res://assets/water/sea_presets.gd')
 
 # Sea of Thieves is the visual reference; this trades far-water coverage for denser close crests.
 var clipmap_tile_size := 0.5 # Keep mesh recentering aligned with the scaled clipmap.
+var clipmap_scale := 0.5
+var _clipmap_scale := [0.5]
+var _spray_emitter_base_scale := Vector3.ONE
 var previous_tile := Vector3i.MAX
 var should_render_imgui := not Engine.is_editor_hint()
 var _scene_preset : Dictionary
@@ -37,6 +40,16 @@ func _ready() -> void:
 	if Engine.is_editor_hint(): return
 	_scene_preset = _capture_scene_preset()
 	_apply_sea_preset(sea_preset if sea_preset in [0, 1] else 0)
+	_spray_emitter_base_scale = $Water/WaterSprayEmitter.scale
+	_apply_clipmap_scale()
+
+func _apply_clipmap_scale() -> void:
+	water.scale = Vector3(clipmap_scale, 1.0, clipmap_scale)
+	var spray_scale := _spray_emitter_base_scale
+	spray_scale.x /= clipmap_scale
+	spray_scale.z /= clipmap_scale
+	$Water/WaterSprayEmitter.scale = spray_scale
+	clipmap_tile_size = clipmap_scale * (1.0 if water.mesh_quality == water.MeshQuality.HIGH else 4.0)
 
 func _capture_scene_preset() -> Dictionary:
 	var snapshot := {
@@ -191,8 +204,12 @@ func _render_imgui() -> void:
 		for mesh_quality in len(water.MeshQuality):
 			if ImGui.Selectable('%s' % mesh_quality_keys[mesh_quality].capitalize()):
 				water.mesh_quality = mesh_quality
-				clipmap_tile_size = 0.5 if mesh_quality == water.MeshQuality.HIGH else 2.0
+				_apply_clipmap_scale()
 		ImGui.EndCombo()
+	imgui_text_tooltip('Clipmap Scale:     ', 'Lower scale packs vertices closer and reduces water coverage. At 0.5, spacing halves and plane area is one quarter of scale 1.0.'); ImGui.SameLine()
+	if ImGui.SliderFloat('##clipmap_scale', _clipmap_scale, 0.25, 1.0):
+		clipmap_scale = _clipmap_scale[0]
+		_apply_clipmap_scale()
 	imgui_text_tooltip('Updates per Second:', 'Denotes how many times wave spectrums will be updated per second.\n(0 is uncapped)'); ImGui.SameLine(); if ImGui.SliderFloat('##update_rate', _updates_per_second, 0, 60): water.updates_per_second = _updates_per_second[0]
 	ImGui.Text('Water Color:       '); ImGui.SameLine(); if ImGui.ColorButtonEx('##water_color_button', water.water_color, ImGui.ColorEditFlags_Float, Vector2(ImGui.GetColumnWidth(), ImGui.GetFrameHeight())): ImGui.OpenPopup('water_color_picker')
 	if ImGui.BeginPopup('water_color_picker'):
