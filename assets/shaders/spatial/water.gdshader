@@ -117,12 +117,13 @@ void fragment() {
 		foam_state = max(foam_state, state);
 	}
 	float freshness = clamp(foam_state.y / max(foam_state.x, 1e-4), 0.0, 1.0);
-	float foam_hf = texture(foam_hf_pattern, UV*foam_hf_scale).a;
+	float foam_hf = smoothstep(0.42, 0.82, texture(foam_hf_pattern, UV*foam_hf_scale).a);
 	float foam_lf = smoothstep(0.2, 0.8, texture(foam_lf_pattern, UV*foam_lf_scale).r);
 	// The parity sheet's age model keeps fresh foam detailed and lets aged foam broaden.
 	float age_blend = smoothstep(0.05, 0.85, freshness) * clamp(foam_texture_blend, 0.0, 1.0);
-	float breakup = mix(foam_lf, foam_hf, age_blend);
-	foam_factor = smoothstep(0.05, 0.95, foam_state.x * mix(0.5, 1.0, breakup));
+	float fresh_coverage = smoothstep(0.32, 0.75, foam_state.y) * foam_hf;
+	float aged_coverage = smoothstep(0.12, 0.6, foam_state.x) * foam_lf;
+	foam_factor = mix(aged_coverage, fresh_coverage, age_blend);
 	// Rare's camera-centered depth contacts map back into the same world-plane UV as the surface.
 	vec2 interaction_uv = (UV - interaction_foam_center) / max(interaction_foam_extent * 2.0, 1e-4) + 0.5;
 	float inside_interaction_bounds = float(all(greaterThanEqual(interaction_uv, vec2(0.0))) && all(lessThanEqual(interaction_uv, vec2(1.0))));
