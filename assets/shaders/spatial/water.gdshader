@@ -218,15 +218,19 @@ void light() {
 
 	// --- DIFFUSE ---
 	const vec3 sss_modifier = vec3(0.9,1.15,0.85); // Subsurface scattering produces a 'greener' color.
-	float sun_scatter = pow(clamp(dot(LIGHT, -VIEW), 0.0, 1.0), 4.0) * pow(clamp(0.5 - 0.5 * dot(LIGHT, NORMAL), 0.0, 1.0), 3.0);
+	// Broaden the backscatter lobe so its color blend reads across crests, not only at the peak angle.
+	float sun_scatter = pow(clamp(dot(LIGHT, -VIEW), 0.0, 1.0), 2.0) * pow(clamp(0.5 - 0.5 * dot(LIGHT, NORMAL), 0.0, 1.0), 2.0);
 	float sss_near = 0.5*pow(dot_nv, 2.0);
 	float lambertian = 0.5*dot_nl;
-	// Sea of Thieves: the normalized FFT choppiness mask drives peak transmission.
-	float crest_scatter = peak_mask * sqrt(1.0 - dot_nv) * sqrt(sun_scatter) * crest_scattering_strength;
-	// Godot multiplies DIFFUSE_LIGHT by ALBEDO; cancel it here to keep cyan independent of the deep tint.
-	DIFFUSE_LIGHT += crest_color.rgb / max(ALBEDO, vec3(1e-4)) * crest_scatter * (1.0 - foam_factor) * (1.0 - fresnel) * ATTENUATION * LIGHT_COLOR;
-	// Foam color is already in ALBEDO. LIGHT_COLOR includes PI; use Lambertian diffuse for foam.
+	// Sea of Thieves blends deep and subsurface water color using view, sun, and the FFT choppiness peak mask.
+	float sss_blend = clamp(peak_mask * sqrt(1.0 - dot_nv) * sqrt(sun_scatter) * crest_scattering_strength, 0.0, 1.0);
+	vec3 scattered_water_color = mix(water_color.rgb, crest_color.rgb, sss_blend);
 	float sss_peak = peak_mask * sun_scatter * crest_scattering_strength;
-	DIFFUSE_LIGHT += mix((sss_peak + sss_near) * sss_modifier / (1.0 + light_mask) + lambertian, vec3(dot_nl / PI), foam_factor) * trough_visibility * (1.0 - fresnel) * ATTENUATION * LIGHT_COLOR;
+	vec3 water_diffuse = (sss_peak + sss_near) * sss_modifier / (1.0 + light_mask) + vec3(lambertian);
+	vec3 foam_diffuse = vec3(dot_nl / PI);
+	// DIFFUSE_LIGHT is multiplied by ALBEDO after light(); cancel its base tint to blend color before diffuse lighting.
+	vec3 diffuse_color = mix(scattered_water_color, foam_color.rgb, foam_factor);
+	vec3 diffuse_intensity = mix(water_diffuse, foam_diffuse, foam_factor);
+	DIFFUSE_LIGHT += diffuse_color / max(ALBEDO, vec3(1e-4)) * diffuse_intensity * trough_visibility * (1.0 - fresnel) * ATTENUATION * LIGHT_COLOR;
 	}
 }

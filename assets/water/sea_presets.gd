@@ -10,7 +10,7 @@ const PRESETS := [
 		'foam_color': Color('#E9EFE5'),
 		'material': {
 			'roughness': 0.35, 'reflection_roughness': 0.38, 'normal_strength': 1.0,
-			'trough_light_strength': 0.4, 'crest_color': Color('#38BAC2'), 'crest_scattering_strength': 0.65,
+			'trough_light_strength': 0.4, 'crest_color': Color('#38BAC2'), 'crest_scattering_strength': 2.0,
 		},
 		'spray_visible': true,
 		'fog_volume_visible': false,
