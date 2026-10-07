@@ -207,7 +207,7 @@ func _render_imgui() -> void:
 				_apply_clipmap_scale()
 		ImGui.EndCombo()
 	imgui_text_tooltip('Clipmap Scale:     ', 'Lower scale packs vertices closer and reduces water coverage. At 0.5, spacing halves and plane area is one quarter of scale 1.0.'); ImGui.SameLine()
-	if ImGui.SliderFloat('##clipmap_scale', _clipmap_scale, 0.25, 1.0):
+	if ImGui.SliderFloat('##clipmap_scale', _clipmap_scale, 0.01, 1.0):
 		clipmap_scale = _clipmap_scale[0]
 		_apply_clipmap_scale()
 	imgui_text_tooltip('Updates per Second:', 'Denotes how many times wave spectrums will be updated per second.\n(0 is uncapped)'); ImGui.SameLine(); if ImGui.SliderFloat('##update_rate', _updates_per_second, 0, 60): water.updates_per_second = _updates_per_second[0]
