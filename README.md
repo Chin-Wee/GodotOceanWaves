@@ -65,7 +65,7 @@ godot --path . --script res://checks/sea_presets.gd --audio-driver Dummy --rende
 # A/B timings: same 1920×1080 camera, full original quality, four 10-second samples.
 godot --path . --script res://checks/daylight_render.gd --audio-driver Dummy --disable-vsync
 godot --path . --script res://checks/daylight_render.gd --audio-driver Dummy --disable-vsync --rendering-method mobile
-# Fixed 50 Hz simulation: compare 4/6/8-second phases and diagnostic foam/light images.
+# Fixed 60 Hz simulation: compare 4/6/8-second phases and diagnostic foam/light images.
 godot --path . --script res://checks/daylight_render.gd --audio-driver Dummy --disable-vsync --max-fps 60 -- --capture
 ```
 
