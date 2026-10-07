@@ -3,7 +3,7 @@ extends Node
 
 const CAPTURE_EXCLUDED_LAYER := 1 << 1
 const REFLECTION_CLIP_LAYER := 1 << 20
-const CAPTURE_SCALE := 0.5
+const CAPTURE_SCALE := 0.75 # Sharper reflected clouds and waterline depth edges without full-resolution capture cost.
 const REFLECTION_CLIP_SHADER := preload('res://assets/shaders/spatial/reflection_clip.gdshader')
 
 @onready var source_camera := get_node("../Camera") as Camera3D
