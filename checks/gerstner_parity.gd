@@ -7,7 +7,7 @@ const TARGET_TIME := 120.0
 const CAPTURE_SECONDS := 4.0
 const RUN_ORDER := [0, 1, 1, 0]
 
-var output := 'user://gerstner-parity/' + RenderingServer.get_current_rendering_method() + '-' + RenderingServer.get_current_rendering_driver_name()
+var output := 'user://gerstner-parity/modes20/' + RenderingServer.get_current_rendering_method() + '-' + RenderingServer.get_current_rendering_driver_name()
 var scene: Node3D
 var water: MeshInstance3D
 var camera: Camera3D
@@ -121,7 +121,7 @@ func _read_cascade_metrics(bytes: PackedByteArray, cascade: int) -> Dictionary:
 	}
 
 func _capture_variant(algorithm: int) -> Dictionary:
-	var label := 'fft' if algorithm == 0 else 'gerstner-120-per-cascade'
+	var label := 'fft' if algorithm == 0 else 'gerstner-20-per-cascade'
 	var generator := _set_mode(algorithm)
 	await process_frame
 	for step in int(CAPTURE_SECONDS * 60.0):
@@ -136,7 +136,7 @@ func _capture_variant(algorithm: int) -> Dictionary:
 	return {'name': label, 'metrics': metrics, 'image': image}
 
 func _measure_variant(algorithm: int, run_index: int) -> Dictionary:
-	var label := 'FFT' if algorithm == 0 else 'Gerstner-120-per-cascade'
+	var label := 'FFT' if algorithm == 0 else 'Gerstner-20-per-cascade'
 	var generator := _set_mode(algorithm)
 	await process_frame
 	for step in 120:
