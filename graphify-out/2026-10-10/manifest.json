@@ -144,9 +144,9 @@
     "semantic_hash": "6bfdcadf89f57a678eb525c2959172ef"
   },
   "README.md": {
-    "mtime": 1791351484.3826983,
-    "seen": 1791610798.331886,
-    "ast_hash": "9cb6a11de95cfe3cda6efc6923be970b",
+    "mtime": 1791260893.977973,
+    "seen": 1791262024.9418938,
+    "ast_hash": "85d71a8baf49903d8a3d3f6d803d4835",
     "semantic_hash": ""
   },
   "addons/imgui-godot/include/imgui-version.txt": {
@@ -177,24 +177,6 @@
     "mtime": 1791194943.409757,
     "seen": 1791195030.778594,
     "ast_hash": "3f2b19fa9c14943b34e5d4f480ba13ba",
-    "semantic_hash": ""
-  },
-  "graphify-out/memory/query_20261010_044112_7b3ea392_investigate_what_it_would_take_to_replace_fft_with.md": {
-    "mtime": 1791607272.1585264,
-    "seen": 1791610798.331889,
-    "ast_hash": "07b1f435822effd8277e2963086a4229",
-    "semantic_hash": ""
-  },
-  "assets/water/foam_breakup_broad.png": {
-    "mtime": 1791351484.3844426,
-    "seen": 1791610798.331892,
-    "ast_hash": "17ea41f26fe0bd4af943834eb3976202",
-    "semantic_hash": ""
-  },
-  "assets/water/foam_breakup_mid.png": {
-    "mtime": 1791351484.3860872,
-    "seen": 1791610798.331893,
-    "ast_hash": "6949cc0bf6b852f6123e4014edc72730",
     "semantic_hash": ""
   }
 }

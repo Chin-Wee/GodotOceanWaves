@@ -203,7 +203,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 16,
-      "community_name": "IRenderer",
+      "community_name": "DummyRenderer",
       "file_type": "code",
       "metadata": {
         "namespace": "ImGuiGodot.Internal",
@@ -214,25 +214,6 @@
       "norm_label": "dummyrenderer",
       "source_file": "addons/imgui-godot/ImGuiGodot/Internal/DummyRenderer.cs",
       "source_location": "L6"
-    },
-    {
-      "id": "addons_imgui_godot_imguigodot_internal_irenderer_imguigodot_internal_irenderer",
-      "label": "IRenderer",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 16,
-      "community_name": "IRenderer",
-      "file_type": "code",
-      "metadata": {
-        "namespace": "ImGuiGodot.Internal",
-        "scope_chain": [
-          "s41"
-        ]
-      },
-      "norm_label": "irenderer",
-      "source_file": "addons/imgui-godot/ImGuiGodot/Internal/IRenderer.cs",
-      "source_location": "L7"
     },
     {
       "id": "addons_imgui_godot_imguigodot_internal_input_imguigodot_internal_input",
@@ -448,13 +429,32 @@
       "source_location": "L15"
     },
     {
+      "id": "addons_imgui_godot_imguigodot_internal_irenderer_imguigodot_internal_irenderer",
+      "label": "IRenderer",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 7,
+      "community_name": "IRenderer",
+      "file_type": "code",
+      "metadata": {
+        "namespace": "ImGuiGodot.Internal",
+        "scope_chain": [
+          "s41"
+        ]
+      },
+      "norm_label": "irenderer",
+      "source_file": "addons/imgui-godot/ImGuiGodot/Internal/IRenderer.cs",
+      "source_location": "L7"
+    },
+    {
       "id": "addons_imgui_godot_imguigodot_internal_rdrendererthreadsafe_imguigodot_internal_cloneddrawdata",
       "label": "ClonedDrawData",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "community": 6,
-      "community_name": "RdRenderer",
+      "community": 7,
+      "community_name": "IRenderer",
       "file_type": "code",
       "metadata": {
         "namespace": "ImGuiGodot.Internal",
@@ -472,8 +472,8 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "community": 6,
-      "community_name": "RdRenderer",
+      "community": 7,
+      "community_name": "IRenderer",
       "file_type": "code",
       "metadata": {
         "namespace": "ImGuiGodot.Internal",
@@ -491,8 +491,8 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "community": 6,
-      "community_name": "RdRenderer",
+      "community": 7,
+      "community_name": "IRenderer",
       "file_type": "code",
       "metadata": {
         "namespace": "ImGuiGodot.Internal",
@@ -744,24 +744,6 @@
       "source_location": "L108"
     },
     {
-      "id": "addons_imgui_godot_imguigodot_imguigd_imguigodot_imguigd_subviewportwidget",
-      "label": ".SubViewportWidget()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "ImGuiGD",
-      "file_type": "code",
-      "metadata": {
-        "namespace": "ImGuiGodot",
-        "scope_chain": [
-          "s85"
-        ]
-      },
-      "norm_label": ".subviewportwidget()",
-      "source_file": "addons/imgui-godot/ImGuiGodot/ImGuiGD.cs",
-      "source_location": "L127"
-    },
-    {
       "id": "addons_imgui_godot_imguigodot_internal_ibackend_imguigodot_internal_ibackend_addfont",
       "label": ".AddFont()",
       "_callable": true,
@@ -886,24 +868,6 @@
       "norm_label": ".setmainviewport()",
       "source_file": "addons/imgui-godot/ImGuiGodot/Internal/IBackend.cs",
       "source_location": "L17"
-    },
-    {
-      "id": "addons_imgui_godot_imguigodot_internal_ibackend_imguigodot_internal_ibackend_subviewportwidget",
-      "label": ".SubViewportWidget()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "ImGuiGD",
-      "file_type": "code",
-      "metadata": {
-        "namespace": "ImGuiGodot.Internal",
-        "scope_chain": [
-          "s44"
-        ]
-      },
-      "norm_label": ".subviewportwidget()",
-      "source_file": "addons/imgui-godot/ImGuiGodot/Internal/IBackend.cs",
-      "source_location": "L18"
     },
     {
       "id": "addons_imgui_godot_include_imgui_godot_addfont",
@@ -1752,6 +1716,42 @@
       "source_location": "L114"
     },
     {
+      "id": "addons_imgui_godot_imguigodot_imguigd_imguigodot_imguigd_subviewportwidget",
+      "label": ".SubViewportWidget()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 12,
+      "community_name": ".Image",
+      "file_type": "code",
+      "metadata": {
+        "namespace": "ImGuiGodot",
+        "scope_chain": [
+          "s85"
+        ]
+      },
+      "norm_label": ".subviewportwidget()",
+      "source_file": "addons/imgui-godot/ImGuiGodot/ImGuiGD.cs",
+      "source_location": "L127"
+    },
+    {
+      "id": "addons_imgui_godot_imguigodot_internal_ibackend_imguigodot_internal_ibackend_subviewportwidget",
+      "label": ".SubViewportWidget()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 12,
+      "community_name": ".Image",
+      "file_type": "code",
+      "metadata": {
+        "namespace": "ImGuiGodot.Internal",
+        "scope_chain": [
+          "s44"
+        ]
+      },
+      "norm_label": ".subviewportwidget()",
+      "source_file": "addons/imgui-godot/ImGuiGodot/Internal/IBackend.cs",
+      "source_location": "L18"
+    },
+    {
       "id": "addons_imgui_godot_imguigodot_widgets_imguigodot_widgets_getatlasuvs",
       "label": ".GetAtlasUVs()",
       "_callable": true,
@@ -2413,7 +2413,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 16,
-      "community_name": "IRenderer",
+      "community_name": "DummyRenderer",
       "file_type": "code",
       "metadata": {
         "namespace": "ImGuiGodot.Internal",
@@ -2431,7 +2431,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 16,
-      "community_name": "IRenderer",
+      "community_name": "DummyRenderer",
       "file_type": "code",
       "metadata": {
         "namespace": "ImGuiGodot.Internal",
@@ -2449,7 +2449,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 16,
-      "community_name": "IRenderer",
+      "community_name": "DummyRenderer",
       "file_type": "code",
       "metadata": {
         "namespace": "ImGuiGodot.Internal",
@@ -2467,7 +2467,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 16,
-      "community_name": "IRenderer",
+      "community_name": "DummyRenderer",
       "file_type": "code",
       "metadata": {
         "namespace": "ImGuiGodot.Internal",
@@ -2485,7 +2485,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 16,
-      "community_name": "IRenderer",
+      "community_name": "DummyRenderer",
       "file_type": "code",
       "metadata": {
         "namespace": "ImGuiGodot.Internal",
@@ -2496,78 +2496,6 @@
       "norm_label": ".render()",
       "source_file": "addons/imgui-godot/ImGuiGodot/Internal/DummyRenderer.cs",
       "source_location": "L22"
-    },
-    {
-      "id": "addons_imgui_godot_imguigodot_internal_irenderer_imguigodot_internal_irenderer_closeviewport",
-      "label": ".CloseViewport()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 16,
-      "community_name": "IRenderer",
-      "file_type": "code",
-      "metadata": {
-        "namespace": "ImGuiGodot.Internal",
-        "scope_chain": [
-          "s41"
-        ]
-      },
-      "norm_label": ".closeviewport()",
-      "source_file": "addons/imgui-godot/ImGuiGodot/Internal/IRenderer.cs",
-      "source_location": "L11"
-    },
-    {
-      "id": "addons_imgui_godot_imguigodot_internal_irenderer_imguigodot_internal_irenderer_initviewport",
-      "label": ".InitViewport()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 16,
-      "community_name": "IRenderer",
-      "file_type": "code",
-      "metadata": {
-        "namespace": "ImGuiGodot.Internal",
-        "scope_chain": [
-          "s41"
-        ]
-      },
-      "norm_label": ".initviewport()",
-      "source_file": "addons/imgui-godot/ImGuiGodot/Internal/IRenderer.cs",
-      "source_location": "L10"
-    },
-    {
-      "id": "addons_imgui_godot_imguigodot_internal_irenderer_imguigodot_internal_irenderer_onhide",
-      "label": ".OnHide()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 16,
-      "community_name": "IRenderer",
-      "file_type": "code",
-      "metadata": {
-        "namespace": "ImGuiGodot.Internal",
-        "scope_chain": [
-          "s41"
-        ]
-      },
-      "norm_label": ".onhide()",
-      "source_file": "addons/imgui-godot/ImGuiGodot/Internal/IRenderer.cs",
-      "source_location": "L13"
-    },
-    {
-      "id": "addons_imgui_godot_imguigodot_internal_irenderer_imguigodot_internal_irenderer_render",
-      "label": ".Render()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 16,
-      "community_name": "IRenderer",
-      "file_type": "code",
-      "metadata": {
-        "namespace": "ImGuiGodot.Internal",
-        "scope_chain": [
-          "s41"
-        ]
-      },
-      "norm_label": ".render()",
-      "source_file": "addons/imgui-godot/ImGuiGodot/Internal/IRenderer.cs",
-      "source_location": "L12"
     },
     {
       "id": "addons_imgui_godot_imguigodot_internal_input_imguigodot_internal_input_convertcursorshape",
@@ -4118,68 +4046,6 @@
       "source_location": "L174"
     },
     {
-      "id": "addons_imgui_godot_imguigodot_internal_rdrendererthreadsafe_imguigodot_internal_cloneddrawdata_dispose",
-      "label": ".Dispose()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 6,
-      "community_name": "RdRenderer",
-      "file_type": "code",
-      "metadata": {
-        "namespace": "ImGuiGodot.Internal",
-        "scope_chain": [
-          "s253"
-        ]
-      },
-      "norm_label": ".dispose()",
-      "source_file": "addons/imgui-godot/ImGuiGodot/Internal/RdRendererThreadSafe.cs",
-      "source_location": "L39"
-    },
-    {
-      "id": "addons_imgui_godot_imguigodot_internal_rdrendererthreadsafe_imguigodot_internal_disposablelist_dispose",
-      "label": ".Dispose()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 6,
-      "community_name": "RdRenderer",
-      "file_type": "code",
-      "metadata": {
-        "namespace": "ImGuiGodot.Internal",
-        "scope_chain": [
-          "s253"
-        ]
-      },
-      "norm_label": ".dispose()",
-      "source_file": "addons/imgui-godot/ImGuiGodot/Internal/RdRendererThreadSafe.cs",
-      "source_location": "L58"
-    },
-    {
-      "id": "addons_imgui_godot_imguigodot_internal_rdrendererthreadsafe_imguigodot_internal_rdrendererthreadsafe_onframepredraw",
-      "label": ".OnFramePreDraw()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 6,
-      "community_name": "RdRenderer",
-      "file_type": "code",
-      "metadata": {
-        "namespace": "ImGuiGodot.Internal",
-        "scope_chain": [
-          "s253"
-        ],
-        "unresolved_calls": [
-          {
-            "callee": "FramebufferIsValid",
-            "receiver_type": "RD",
-            "lang": "csharp",
-            "line": "L127"
-          }
-        ]
-      },
-      "norm_label": ".onframepredraw()",
-      "source_file": "addons/imgui-godot/ImGuiGodot/Internal/RdRendererThreadSafe.cs",
-      "source_location": "L120"
-    },
-    {
       "id": "addons_imgui_godot_imguigodot_internal_rdrendererthreadsafe_imguigodot_internal_rdrendererthreadsafe_render",
       "label": ".Render()",
       "_callable": true,
@@ -4206,12 +4072,146 @@
       "source_location": "L86"
     },
     {
+      "id": "addons_imgui_godot_imguigodot_internal_irenderer_imguigodot_internal_irenderer_closeviewport",
+      "label": ".CloseViewport()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 7,
+      "community_name": "IRenderer",
+      "file_type": "code",
+      "metadata": {
+        "namespace": "ImGuiGodot.Internal",
+        "scope_chain": [
+          "s41"
+        ]
+      },
+      "norm_label": ".closeviewport()",
+      "source_file": "addons/imgui-godot/ImGuiGodot/Internal/IRenderer.cs",
+      "source_location": "L11"
+    },
+    {
+      "id": "addons_imgui_godot_imguigodot_internal_irenderer_imguigodot_internal_irenderer_initviewport",
+      "label": ".InitViewport()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 7,
+      "community_name": "IRenderer",
+      "file_type": "code",
+      "metadata": {
+        "namespace": "ImGuiGodot.Internal",
+        "scope_chain": [
+          "s41"
+        ]
+      },
+      "norm_label": ".initviewport()",
+      "source_file": "addons/imgui-godot/ImGuiGodot/Internal/IRenderer.cs",
+      "source_location": "L10"
+    },
+    {
+      "id": "addons_imgui_godot_imguigodot_internal_irenderer_imguigodot_internal_irenderer_onhide",
+      "label": ".OnHide()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 7,
+      "community_name": "IRenderer",
+      "file_type": "code",
+      "metadata": {
+        "namespace": "ImGuiGodot.Internal",
+        "scope_chain": [
+          "s41"
+        ]
+      },
+      "norm_label": ".onhide()",
+      "source_file": "addons/imgui-godot/ImGuiGodot/Internal/IRenderer.cs",
+      "source_location": "L13"
+    },
+    {
+      "id": "addons_imgui_godot_imguigodot_internal_irenderer_imguigodot_internal_irenderer_render",
+      "label": ".Render()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 7,
+      "community_name": "IRenderer",
+      "file_type": "code",
+      "metadata": {
+        "namespace": "ImGuiGodot.Internal",
+        "scope_chain": [
+          "s41"
+        ]
+      },
+      "norm_label": ".render()",
+      "source_file": "addons/imgui-godot/ImGuiGodot/Internal/IRenderer.cs",
+      "source_location": "L12"
+    },
+    {
+      "id": "addons_imgui_godot_imguigodot_internal_rdrendererthreadsafe_imguigodot_internal_cloneddrawdata_dispose",
+      "label": ".Dispose()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 7,
+      "community_name": "IRenderer",
+      "file_type": "code",
+      "metadata": {
+        "namespace": "ImGuiGodot.Internal",
+        "scope_chain": [
+          "s253"
+        ]
+      },
+      "norm_label": ".dispose()",
+      "source_file": "addons/imgui-godot/ImGuiGodot/Internal/RdRendererThreadSafe.cs",
+      "source_location": "L39"
+    },
+    {
+      "id": "addons_imgui_godot_imguigodot_internal_rdrendererthreadsafe_imguigodot_internal_disposablelist_dispose",
+      "label": ".Dispose()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 7,
+      "community_name": "IRenderer",
+      "file_type": "code",
+      "metadata": {
+        "namespace": "ImGuiGodot.Internal",
+        "scope_chain": [
+          "s253"
+        ]
+      },
+      "norm_label": ".dispose()",
+      "source_file": "addons/imgui-godot/ImGuiGodot/Internal/RdRendererThreadSafe.cs",
+      "source_location": "L58"
+    },
+    {
+      "id": "addons_imgui_godot_imguigodot_internal_rdrendererthreadsafe_imguigodot_internal_rdrendererthreadsafe_onframepredraw",
+      "label": ".OnFramePreDraw()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 7,
+      "community_name": "IRenderer",
+      "file_type": "code",
+      "metadata": {
+        "namespace": "ImGuiGodot.Internal",
+        "scope_chain": [
+          "s253"
+        ],
+        "unresolved_calls": [
+          {
+            "callee": "FramebufferIsValid",
+            "receiver_type": "RD",
+            "lang": "csharp",
+            "line": "L127"
+          }
+        ]
+      },
+      "norm_label": ".onframepredraw()",
+      "source_file": "addons/imgui-godot/ImGuiGodot/Internal/RdRendererThreadSafe.cs",
+      "source_location": "L120"
+    },
+    {
       "id": "addons_imgui_godot_imguigodot_internal_rdrendererthreadsafe_imguigodot_internal_rdrendererthreadsafe_takeshareddata",
       "label": ".TakeSharedData()",
       "_callable": true,
       "_origin": "ast",
-      "community": 6,
-      "community_name": "RdRenderer",
+      "community": 7,
+      "community_name": "IRenderer",
       "file_type": "code",
       "metadata": {
         "namespace": "ImGuiGodot.Internal",
@@ -4532,17 +4532,6 @@
       "source_location": ""
     },
     {
-      "id": "addons_imgui_godot_imguigodot_imguigd_cs_subviewport",
-      "label": "SubViewport",
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "ImGuiGD",
-      "file_type": "code",
-      "norm_label": "subviewport",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
       "id": "addons_imgui_godot_imguigodot_imguigd_cs_texture2d",
       "label": "Texture2D",
       "_origin": "ast",
@@ -4645,17 +4634,6 @@
       "community_name": "ImGuiGD",
       "file_type": "code",
       "norm_label": "fontfile",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
-      "id": "addons_imgui_godot_imguigodot_internal_ibackend_cs_subviewport",
-      "label": "SubViewport",
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "ImGuiGD",
-      "file_type": "code",
-      "norm_label": "subviewport",
       "source_file": "",
       "source_location": ""
     },
@@ -5138,6 +5116,28 @@
       "source_location": ""
     },
     {
+      "id": "addons_imgui_godot_imguigodot_imguigd_cs_subviewport",
+      "label": "SubViewport",
+      "_origin": "ast",
+      "community": 12,
+      "community_name": ".Image",
+      "file_type": "code",
+      "norm_label": "subviewport",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "addons_imgui_godot_imguigodot_internal_ibackend_cs_subviewport",
+      "label": "SubViewport",
+      "_origin": "ast",
+      "community": 12,
+      "community_name": ".Image",
+      "file_type": "code",
+      "norm_label": "subviewport",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
       "id": "addons_imgui_godot_imguigodot_widgets_cs_atlastexture",
       "label": "AtlasTexture",
       "_origin": "ast",
@@ -5490,7 +5490,7 @@
       "label": "DummyRenderer.cs",
       "_origin": "ast",
       "community": 16,
-      "community_name": "IRenderer",
+      "community_name": "DummyRenderer",
       "file_type": "code",
       "norm_label": "dummyrenderer.cs",
       "source_file": "addons/imgui-godot/ImGuiGodot/Internal/DummyRenderer.cs",
@@ -5501,7 +5501,7 @@
       "label": "Rid",
       "_origin": "ast",
       "community": 16,
-      "community_name": "IRenderer",
+      "community_name": "DummyRenderer",
       "file_type": "code",
       "norm_label": "rid",
       "source_file": "",
@@ -5512,7 +5512,7 @@
       "label": "Name",
       "_origin": "ast",
       "community": 16,
-      "community_name": "IRenderer",
+      "community_name": "DummyRenderer",
       "file_type": "code",
       "metadata": {
         "namespace": "ImGuiGodot.Internal",
@@ -5523,45 +5523,6 @@
       "norm_label": "name",
       "source_file": "addons/imgui-godot/ImGuiGodot/Internal/DummyRenderer.cs",
       "source_location": "L8"
-    },
-    {
-      "id": "addons_imgui_godot_imguigodot_internal_irenderer",
-      "label": "IRenderer.cs",
-      "_origin": "ast",
-      "community": 16,
-      "community_name": "IRenderer",
-      "file_type": "code",
-      "norm_label": "irenderer.cs",
-      "source_file": "addons/imgui-godot/ImGuiGodot/Internal/IRenderer.cs",
-      "source_location": "L1"
-    },
-    {
-      "id": "addons_imgui_godot_imguigodot_internal_irenderer_cs_rid",
-      "label": "Rid",
-      "_origin": "ast",
-      "community": 16,
-      "community_name": "IRenderer",
-      "file_type": "code",
-      "norm_label": "rid",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
-      "id": "addons_imgui_godot_imguigodot_internal_irenderer_imguigodot_internal_irenderer_name",
-      "label": "Name",
-      "_origin": "ast",
-      "community": 16,
-      "community_name": "IRenderer",
-      "file_type": "code",
-      "metadata": {
-        "namespace": "ImGuiGodot.Internal",
-        "scope_chain": [
-          "s41"
-        ]
-      },
-      "norm_label": "name",
-      "source_file": "addons/imgui-godot/ImGuiGodot/Internal/IRenderer.cs",
-      "source_location": "L9"
     },
     {
       "id": "readme",
@@ -6680,62 +6641,6 @@
       "source_location": "L49"
     },
     {
-      "id": "addons_imgui_godot_imguigodot_internal_rdrendererthreadsafe",
-      "label": "RdRendererThreadSafe.cs",
-      "_origin": "ast",
-      "community": 6,
-      "community_name": "RdRenderer",
-      "file_type": "code",
-      "norm_label": "rdrendererthreadsafe.cs",
-      "source_file": "addons/imgui-godot/ImGuiGodot/Internal/RdRendererThreadSafe.cs",
-      "source_location": "L1"
-    },
-    {
-      "id": "addons_imgui_godot_imguigodot_internal_rdrendererthreadsafe_cs_imdrawdataptr",
-      "label": "ImDrawDataPtr",
-      "_origin": "ast",
-      "community": 6,
-      "community_name": "RdRenderer",
-      "file_type": "code",
-      "norm_label": "imdrawdataptr",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
-      "id": "addons_imgui_godot_imguigodot_internal_rdrendererthreadsafe_imguigodot_internal_cloneddrawdata_data",
-      "label": "Data",
-      "_origin": "ast",
-      "community": 6,
-      "community_name": "RdRenderer",
-      "file_type": "code",
-      "metadata": {
-        "namespace": "ImGuiGodot.Internal",
-        "scope_chain": [
-          "s253"
-        ]
-      },
-      "norm_label": "data",
-      "source_file": "addons/imgui-godot/ImGuiGodot/Internal/RdRendererThreadSafe.cs",
-      "source_location": "L16"
-    },
-    {
-      "id": "addons_imgui_godot_imguigodot_internal_rdrendererthreadsafe_imguigodot_internal_rdrendererthreadsafe_name",
-      "label": "Name",
-      "_origin": "ast",
-      "community": 6,
-      "community_name": "RdRenderer",
-      "file_type": "code",
-      "metadata": {
-        "namespace": "ImGuiGodot.Internal",
-        "scope_chain": [
-          "s253"
-        ]
-      },
-      "norm_label": "name",
-      "source_file": "addons/imgui-godot/ImGuiGodot/Internal/RdRendererThreadSafe.cs",
-      "source_location": "L70"
-    },
-    {
       "id": "array",
       "label": "Array",
       "_origin": "ast",
@@ -6769,28 +6674,6 @@
       "source_location": ""
     },
     {
-      "id": "idisposable",
-      "label": "IDisposable",
-      "_origin": "ast",
-      "community": 6,
-      "community_name": "RdRenderer",
-      "file_type": "code",
-      "norm_label": "idisposable",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
-      "id": "list",
-      "label": "List",
-      "_origin": "ast",
-      "community": 6,
-      "community_name": "RdRenderer",
-      "file_type": "code",
-      "norm_label": "list",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
       "id": "rect2",
       "label": "Rect2",
       "_origin": "ast",
@@ -6802,83 +6685,132 @@
       "source_location": ""
     },
     {
-      "id": "tuple",
-      "label": "Tuple",
+      "id": "addons_imgui_godot_imguigodot_internal_irenderer",
+      "label": "IRenderer.cs",
       "_origin": "ast",
-      "community": 6,
-      "community_name": "RdRenderer",
+      "community": 7,
+      "community_name": "IRenderer",
       "file_type": "code",
-      "norm_label": "tuple",
+      "norm_label": "irenderer.cs",
+      "source_file": "addons/imgui-godot/ImGuiGodot/Internal/IRenderer.cs",
+      "source_location": "L1"
+    },
+    {
+      "id": "addons_imgui_godot_imguigodot_internal_irenderer_cs_rid",
+      "label": "Rid",
+      "_origin": "ast",
+      "community": 7,
+      "community_name": "IRenderer",
+      "file_type": "code",
+      "norm_label": "rid",
       "source_file": "",
       "source_location": ""
     },
     {
-      "id": "graphify_out_memory_query_20261010_044112_7b3ea392_investigate_what_it_would_take_to_replace_fft_with",
-      "label": "query_20261010_044112_7b3ea392_investigate_what_it_would_take_to_replace_fft_with.md",
+      "id": "addons_imgui_godot_imguigodot_internal_irenderer_imguigodot_internal_irenderer_name",
+      "label": "Name",
       "_origin": "ast",
       "community": 7,
-      "community_name": "Q: investigate what it would take to replace fft with gerstner without changing anything else about the simulation",
-      "file_type": "document",
-      "frontmatter": {
-        "type": "query",
-        "date": "2026-10-10T04:41:12.157984+00:00",
-        "question": "investigate what it would take to replace fft with gerstner without changing anything else about the simulation",
-        "contributor": "graphify",
-        "outcome": "useful",
-        "source_nodes": "[&quot;Wave Simulation&quot;, &quot;Fast Fourier Transform&quot;, &quot;Wave Cascades&quot;]"
+      "community_name": "IRenderer",
+      "file_type": "code",
+      "metadata": {
+        "namespace": "ImGuiGodot.Internal",
+        "scope_chain": [
+          "s41"
+        ]
       },
-      "node_kind": "page",
-      "norm_label": "query_20261010_044112_7b3ea392_investigate_what_it_would_take_to_replace_fft_with.md",
-      "source_file": "graphify-out/memory/query_20261010_044112_7b3ea392_investigate_what_it_would_take_to_replace_fft_with.md",
+      "norm_label": "name",
+      "source_file": "addons/imgui-godot/ImGuiGodot/Internal/IRenderer.cs",
+      "source_location": "L9"
+    },
+    {
+      "id": "addons_imgui_godot_imguigodot_internal_rdrendererthreadsafe",
+      "label": "RdRendererThreadSafe.cs",
+      "_origin": "ast",
+      "community": 7,
+      "community_name": "IRenderer",
+      "file_type": "code",
+      "norm_label": "rdrendererthreadsafe.cs",
+      "source_file": "addons/imgui-godot/ImGuiGodot/Internal/RdRendererThreadSafe.cs",
       "source_location": "L1"
     },
     {
-      "id": "graphify_out_memory_query_20261010_044112_7b3ea392_investigate_what_it_would_take_to_replace_fft_with_answer",
-      "label": "Answer",
+      "id": "addons_imgui_godot_imguigodot_internal_rdrendererthreadsafe_cs_imdrawdataptr",
+      "label": "ImDrawDataPtr",
       "_origin": "ast",
       "community": 7,
-      "community_name": "Q: investigate what it would take to replace fft with gerstner without changing anything else about the simulation",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "answer",
-      "source_file": "graphify-out/memory/query_20261010_044112_7b3ea392_investigate_what_it_would_take_to_replace_fft_with.md",
-      "source_location": "L12"
+      "community_name": "IRenderer",
+      "file_type": "code",
+      "norm_label": "imdrawdataptr",
+      "source_file": "",
+      "source_location": ""
     },
     {
-      "id": "graphify_out_memory_query_20261010_044112_7b3ea392_investigate_what_it_would_take_to_replace_fft_with_outcome",
-      "label": "Outcome",
+      "id": "addons_imgui_godot_imguigodot_internal_rdrendererthreadsafe_imguigodot_internal_cloneddrawdata_data",
+      "label": "Data",
       "_origin": "ast",
       "community": 7,
-      "community_name": "Q: investigate what it would take to replace fft with gerstner without changing anything else about the simulation",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "outcome",
-      "source_file": "graphify-out/memory/query_20261010_044112_7b3ea392_investigate_what_it_would_take_to_replace_fft_with.md",
+      "community_name": "IRenderer",
+      "file_type": "code",
+      "metadata": {
+        "namespace": "ImGuiGodot.Internal",
+        "scope_chain": [
+          "s253"
+        ]
+      },
+      "norm_label": "data",
+      "source_file": "addons/imgui-godot/ImGuiGodot/Internal/RdRendererThreadSafe.cs",
       "source_location": "L16"
     },
     {
-      "id": "graphify_out_memory_query_20261010_044112_7b3ea392_investigate_what_it_would_take_to_replace_fft_with_q_investigate_what_it_would_take_to_replace_fft_with_gerstner_without_changing_anything_else_about_the_simulation",
-      "label": "Q: investigate what it would take to replace fft with gerstner without changing anything else about the simulation",
+      "id": "addons_imgui_godot_imguigodot_internal_rdrendererthreadsafe_imguigodot_internal_rdrendererthreadsafe_name",
+      "label": "Name",
       "_origin": "ast",
       "community": 7,
-      "community_name": "Q: investigate what it would take to replace fft with gerstner without changing anything else about the simulation",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "q: investigate what it would take to replace fft with gerstner without changing anything else about the simulation",
-      "source_file": "graphify-out/memory/query_20261010_044112_7b3ea392_investigate_what_it_would_take_to_replace_fft_with.md",
-      "source_location": "L10"
+      "community_name": "IRenderer",
+      "file_type": "code",
+      "metadata": {
+        "namespace": "ImGuiGodot.Internal",
+        "scope_chain": [
+          "s253"
+        ]
+      },
+      "norm_label": "name",
+      "source_file": "addons/imgui-godot/ImGuiGodot/Internal/RdRendererThreadSafe.cs",
+      "source_location": "L70"
     },
     {
-      "id": "graphify_out_memory_query_20261010_044112_7b3ea392_investigate_what_it_would_take_to_replace_fft_with_source_nodes",
-      "label": "Source Nodes",
+      "id": "idisposable",
+      "label": "IDisposable",
       "_origin": "ast",
       "community": 7,
-      "community_name": "Q: investigate what it would take to replace fft with gerstner without changing anything else about the simulation",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "source nodes",
-      "source_file": "graphify-out/memory/query_20261010_044112_7b3ea392_investigate_what_it_would_take_to_replace_fft_with.md",
-      "source_location": "L20"
+      "community_name": "IRenderer",
+      "file_type": "code",
+      "norm_label": "idisposable",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "list",
+      "label": "List",
+      "_origin": "ast",
+      "community": 7,
+      "community_name": "IRenderer",
+      "file_type": "code",
+      "norm_label": "list",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "tuple",
+      "label": "Tuple",
+      "_origin": "ast",
+      "community": 7,
+      "community_name": "IRenderer",
+      "file_type": "code",
+      "norm_label": "tuple",
+      "source_file": "",
+      "source_location": ""
     },
     {
       "id": "addons_imgui_godot_imguigodot_imguicontroller_cs_inputevent",
@@ -12140,50 +12072,6 @@
       "weight": 1.0
     },
     {
-      "source": "graphify_out_memory_query_20261010_044112_7b3ea392_investigate_what_it_would_take_to_replace_fft_with",
-      "target": "graphify_out_memory_query_20261010_044112_7b3ea392_investigate_what_it_would_take_to_replace_fft_with_q_investigate_what_it_would_take_to_replace_fft_with_gerstner_without_changing_anything_else_about_the_simulation",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "graphify-out/memory/query_20261010_044112_7b3ea392_investigate_what_it_would_take_to_replace_fft_with.md",
-      "source_location": "L10",
-      "weight": 1.0
-    },
-    {
-      "source": "graphify_out_memory_query_20261010_044112_7b3ea392_investigate_what_it_would_take_to_replace_fft_with_q_investigate_what_it_would_take_to_replace_fft_with_gerstner_without_changing_anything_else_about_the_simulation",
-      "target": "graphify_out_memory_query_20261010_044112_7b3ea392_investigate_what_it_would_take_to_replace_fft_with_answer",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "graphify-out/memory/query_20261010_044112_7b3ea392_investigate_what_it_would_take_to_replace_fft_with.md",
-      "source_location": "L12",
-      "weight": 1.0
-    },
-    {
-      "source": "graphify_out_memory_query_20261010_044112_7b3ea392_investigate_what_it_would_take_to_replace_fft_with_q_investigate_what_it_would_take_to_replace_fft_with_gerstner_without_changing_anything_else_about_the_simulation",
-      "target": "graphify_out_memory_query_20261010_044112_7b3ea392_investigate_what_it_would_take_to_replace_fft_with_outcome",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "graphify-out/memory/query_20261010_044112_7b3ea392_investigate_what_it_would_take_to_replace_fft_with.md",
-      "source_location": "L16",
-      "weight": 1.0
-    },
-    {
-      "source": "graphify_out_memory_query_20261010_044112_7b3ea392_investigate_what_it_would_take_to_replace_fft_with_q_investigate_what_it_would_take_to_replace_fft_with_gerstner_without_changing_anything_else_about_the_simulation",
-      "target": "graphify_out_memory_query_20261010_044112_7b3ea392_investigate_what_it_would_take_to_replace_fft_with_source_nodes",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "graphify-out/memory/query_20261010_044112_7b3ea392_investigate_what_it_would_take_to_replace_fft_with.md",
-      "source_location": "L20",
-      "weight": 1.0
-    },
-    {
       "source": "readme",
       "target": "readme_godotoceanwaves",
       "relation": "contains",
@@ -14074,5 +13962,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "0de5ddda735d301a48bc2abb6ded362e51328770"
+  "built_at_commit": "d199867dd08eabc1c30766b2ace02db207e97219"
 }

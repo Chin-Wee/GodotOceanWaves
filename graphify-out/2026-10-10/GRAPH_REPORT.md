@@ -1,17 +1,17 @@
-# Graph Report - GodotOceanWaves  (2026-10-10)
+# Graph Report - GodotOceanWaves  (2026-10-06)
 
 ## Corpus Check
-- 24 files · ~867,157 words
+- 23 files · ~857,287 words
 - Verdict: corpus is large enough that graph structure adds value.
-- Unclassified: 115 file(s) not represented in the graph (top: .uid 29, .import 22, .gd 22)
+- Unclassified: 99 file(s) not represented in the graph (top: .uid 26, .gd 20, .import 16)
 
 ## Summary
-- 395 nodes · 550 edges · 18 communities
+- 390 nodes · 546 edges · 18 communities
 - Extraction: 97% EXTRACTED · 3% INFERRED · 0% AMBIGUOUS · INFERRED: 19 edges (avg confidence: 0.83)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `0de5ddda`
+- Built from commit: `d199867d`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -23,7 +23,7 @@
 - State
 - GodotImGuiWindow
 - RdRenderer
-- Q: investigate what it would take to replace fft with gerstner without changing anything else about the simulation
+- IRenderer
 - ImGuiController
 - ImGuiGodot.Internal
 - CanvasRenderer
@@ -32,7 +32,7 @@
 - BackendNet
 - ImGuiLayer
 - ImGuiExtensions
-- IRenderer
+- DummyRenderer
 - GodotOceanWaves
 
 ## God Nodes (most connected - your core abstractions)
@@ -56,8 +56,8 @@
   addons/imgui-godot/ImGuiGodot/Internal/BackendNet.cs → addons/imgui-godot/ImGuiGodot/Internal/IBackend.cs
 - `CanvasRenderer` --implements--> `IRenderer`  [EXTRACTED]
   addons/imgui-godot/ImGuiGodot/Internal/CanvasRenderer.cs → addons/imgui-godot/ImGuiGodot/Internal/IRenderer.cs
-- `State` --references--> `Fonts`  [EXTRACTED]
-  addons/imgui-godot/ImGuiGodot/Internal/State.cs → addons/imgui-godot/ImGuiGodot/Internal/Fonts.cs
+- `DummyRenderer` --implements--> `IRenderer`  [EXTRACTED]
+  addons/imgui-godot/ImGuiGodot/Internal/DummyRenderer.cs → addons/imgui-godot/ImGuiGodot/Internal/IRenderer.cs
 
 ## Import Cycles
 - None detected.
@@ -66,7 +66,7 @@
 
 ### Community 0 - "ImGuiGD"
 Cohesion: 0.07
-Nodes (19): Action, Callable, FontFile, IntPtr, SubViewport, Texture2D, Viewport, ImGuiGD (+11 more)
+Nodes (17): Action, Callable, FontFile, IntPtr, Texture2D, Viewport, ImGuiGD, JoyAxisDeadZone (+9 more)
 
 ### Community 1 - "imgui-godot.h"
 Cohesion: 0.10
@@ -89,12 +89,12 @@ Cohesion: 0.11
 Nodes (13): IntPtr, Vector2, Vector2I, Window, GodotImGuiWindow, ViewportsExts, ImGuiPlatformIO_Set_Platform_GetWindowPos(), ImGuiPlatformIO_Set_Platform_GetWindowSize() (+5 more)
 
 ### Community 6 - "RdRenderer"
-Cohesion: 0.08
-Nodes (21): Color, Dictionary, ImDrawDataPtr, ImDrawVert, IntPtr, Rid, RdRenderer, Name (+13 more)
+Cohesion: 0.14
+Nodes (12): Color, Dictionary, ImDrawDataPtr, ImDrawVert, IntPtr, Rid, RdRenderer, Name (+4 more)
 
-### Community 7 - "Q: investigate what it would take to replace fft with gerstner without changing anything else about the simulation"
-Cohesion: 0.40
-Nodes (4): Answer, Outcome, Q: investigate what it would take to replace fft with gerstner without changing anything else about the simulation, Source Nodes
+### Community 7 - "IRenderer"
+Cohesion: 0.12
+Nodes (12): Rid, IRenderer, Name, ImDrawDataPtr, ClonedDrawData, Data, DisposableList, RdRendererThreadSafe (+4 more)
 
 ### Community 8 - "ImGuiController"
 Cohesion: 0.13
@@ -113,8 +113,8 @@ Cohesion: 0.17
 Nodes (11): FontFile, List, Texture2D, FontParams, Font, FontSize, Merge, Ranges (+3 more)
 
 ### Community 12 - ".Image"
-Cohesion: 0.29
-Nodes (8): AtlasTexture, SubViewport, Texture2D, Vector2, Vector4, Widgets, uv0, uv1
+Cohesion: 0.19
+Nodes (10): SubViewport, SubViewport, AtlasTexture, SubViewport, Texture2D, Vector2, Vector4, Widgets (+2 more)
 
 ### Community 13 - "BackendNet"
 Cohesion: 0.12
@@ -128,31 +128,31 @@ Nodes (8): InputEvent, Node, Rid, Vector2I, Viewport, ImGuiLayer, CanvasLayer, T
 Cohesion: 0.19
 Nodes (8): Color, ImGuiIOPtr, ImGuiKey, JoyButton, Key, Vector4, ImGuiExtensions, Vector3
 
-### Community 16 - "IRenderer"
-Cohesion: 0.13
-Nodes (6): Rid, DummyRenderer, Name, Rid, IRenderer, Name
+### Community 16 - "DummyRenderer"
+Cohesion: 0.25
+Nodes (3): Rid, DummyRenderer, Name
 
 ### Community 17 - "GodotOceanWaves"
 Cohesion: 0.09
 Nodes (21): Attribution, Daylight controls, Earlier validation — 2026-10-05 (source revision 7d48a1e), Embedded panel input, Fast Fourier Transform, Freecam, foam and reflections, GodotOceanWaves, Introduction (+13 more)
 
 ## Knowledge Gaps
-- **61 isolated node(s):** `Instance`, `Signaler`, `JoyAxisDeadZone`, `Scale`, `Visible` (+56 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 180 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **58 isolated node(s):** `Instance`, `Signaler`, `JoyAxisDeadZone`, `Scale`, `Visible` (+53 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 176 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `ImGuiGodot.Internal` connect `ImGuiGodot.Internal` to `ImGuiGD`, `Input`, `GodotImGuiWindow`, `RdRenderer`, `CanvasRenderer`, `BackendNet`, `IRenderer`?**
-  _High betweenness centrality (0.310) - this node is a cross-community bridge._
-- **Why does `State` connect `State` to `Input`, `RdRenderer`, `ImGuiGodot.Internal`, `Fonts`, `IRenderer`?**
-  _High betweenness centrality (0.207) - this node is a cross-community bridge._
-- **Why does `ImGuiGD` connect `ImGuiGD` to `ImGuiGodot.Internal`, `BackendNative`?**
-  _High betweenness centrality (0.145) - this node is a cross-community bridge._
+- **Why does `ImGuiGodot.Internal` connect `ImGuiGodot.Internal` to `ImGuiGD`, `Input`, `GodotImGuiWindow`, `IRenderer`, `CanvasRenderer`, `BackendNet`, `DummyRenderer`?**
+  _High betweenness centrality (0.318) - this node is a cross-community bridge._
+- **Why does `State` connect `State` to `ImGuiGodot.Internal`, `Input`, `Fonts`, `IRenderer`?**
+  _High betweenness centrality (0.213) - this node is a cross-community bridge._
+- **Why does `ImGuiGD` connect `ImGuiGD` to `ImGuiGodot.Internal`, `BackendNative`, `.Image`?**
+  _High betweenness centrality (0.149) - this node is a cross-community bridge._
 - **What connects `Instance`, `Signaler`, `JoyAxisDeadZone` to the rest of the system?**
-  _61 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _58 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `ImGuiGD` be split into smaller, more focused modules?**
-  _Cohesion score 0.06606606606606606 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.07386363636363637 - nodes in this community are weakly interconnected._
 - **Should `imgui-godot.h` be split into smaller, more focused modules?**
   _Cohesion score 0.09659090909090909 - nodes in this community are weakly interconnected._
 - **Should `Input` be split into smaller, more focused modules?**
