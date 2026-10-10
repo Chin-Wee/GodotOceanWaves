@@ -4,7 +4,7 @@
 
 #define PI           (3.141592653589793)
 #define G            (9.81)
-#define MODE_COUNT   120U
+#define MODE_COUNT   20U
 #define RECORD_SIZE  (MODE_COUNT * 2U)
 #define NUM_SPECTRA  (4U)
 

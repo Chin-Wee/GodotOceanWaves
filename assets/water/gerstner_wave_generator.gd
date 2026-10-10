@@ -3,7 +3,7 @@ extends "res://assets/water/wave_generator.gd"
 # Architecture reference: Diablo IV uses Gerstner waves for deep water (GDC 2024).
 # This variant keeps its existing spectrum, output maps, unpack and foam feedback.
 # https://gdcvault.com/play/1034490/Technical-Artist-Summit-H2O-in
-const MODE_COUNT := 120
+const MODE_COUNT := 20
 const MODE_RECORD_SIZE := MODE_COUNT * 2
 
 func init_gpu(num_cascades : int) -> void:
