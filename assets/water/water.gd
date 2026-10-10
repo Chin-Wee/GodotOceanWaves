@@ -7,6 +7,7 @@ const WATER_MAT := preload('res://assets/water/mat_water.tres')
 const SPRAY_MAT := preload('res://assets/water/mat_spray.tres')
 const WATER_MESH_HIGH := preload('res://assets/water/clipmap_high.obj')
 const WATER_MESH_LOW := preload('res://assets/water/clipmap_low.obj')
+const GERSTNER_WAVE_GENERATOR := preload('res://assets/water/gerstner_wave_generator.gd')
 
 enum MeshQuality { LOW, HIGH }
 
@@ -38,6 +39,12 @@ enum MeshQuality { LOW, HIGH }
 @export_enum('128x128:128', '256x256:256', '512x512:512', '1024x1024:1024') var map_size := 1024 :
 	set(value):
 		map_size = value
+		_setup_wave_generator()
+
+@export_enum('FFT', 'Gerstner (120/cascade)') var wave_algorithm := 0 :
+	set(value):
+		if wave_algorithm == value: return
+		wave_algorithm = value
 		_setup_wave_generator()
 
 @export var mesh_quality := MeshQuality.HIGH :
@@ -100,7 +107,7 @@ func _setup_wave_generator() -> void:
 	for param in parameters:
 		param.should_generate_spectrum = true
 
-	wave_generator = WaveGenerator.new()
+	wave_generator = GERSTNER_WAVE_GENERATOR.new() if wave_algorithm == 1 else WaveGenerator.new()
 	wave_generator.map_size = map_size
 	wave_generator.init_gpu(maxi(2, parameters.size())) # FIXME: This is needed because my RenderContext API sucks...
 

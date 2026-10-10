@@ -199,6 +199,12 @@ func _render_imgui() -> void:
 			if ImGui.Selectable('%dx%d' % [resolution, resolution]):
 				water.map_size = resolution
 		ImGui.EndCombo()
+	imgui_text_tooltip('Wave Algorithm:   ', 'Experimental: 120 seeded spectrum-derived Gerstner components per cascade (30 log-frequency bands x 4 wind sectors). Keeps the FFT displacement, normal, Jacobian, and foam path; substantially slower than FFT.'); ImGui.SameLine()
+	var wave_algorithms := ['FFT', 'Gerstner (120/cascade)']
+	if ImGui.BeginCombo('##wave_algorithm', wave_algorithms[water.wave_algorithm]):
+		for algorithm in wave_algorithms.size():
+			if ImGui.Selectable(wave_algorithms[algorithm]): water.wave_algorithm = algorithm
+		ImGui.EndCombo()
 	ImGui.Text('Wave Mesh Quality: '); ImGui.SameLine();
 	if ImGui.BeginCombo('##mesh_quality', '%s' % mesh_quality_keys[water.mesh_quality].capitalize()):
 		for mesh_quality in len(water.MeshQuality):

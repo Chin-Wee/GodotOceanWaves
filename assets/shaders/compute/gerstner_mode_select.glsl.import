@@ -1,0 +1,13 @@
+[remap]
+
+importer="glsl"
+type="RDShaderFile"
+uid="uid://dtwf6aijqju18"
+path="res://.godot/imported/gerstner_mode_select.glsl-3155f30e74adac67db06a608c01d421a.res"
+
+[deps]
+
+source_file="res://assets/shaders/compute/gerstner_mode_select.glsl"
+dest_files=["res://.godot/imported/gerstner_mode_select.glsl-3155f30e74adac67db06a608c01d421a.res"]
+
+[params]

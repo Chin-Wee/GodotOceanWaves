@@ -1,0 +1,13 @@
+[remap]
+
+importer="glsl"
+type="RDShaderFile"
+uid="uid://dhsn4ulpjd7ac"
+path="res://.godot/imported/gerstner_energy_reduce.glsl-5c8026be7d43d781229bfc889fb5f810.res"
+
+[deps]
+
+source_file="res://assets/shaders/compute/gerstner_energy_reduce.glsl"
+dest_files=["res://.godot/imported/gerstner_energy_reduce.glsl-5c8026be7d43d781229bfc889fb5f810.res"]
+
+[params]
