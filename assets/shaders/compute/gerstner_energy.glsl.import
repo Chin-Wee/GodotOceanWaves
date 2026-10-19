@@ -11,3 +11,4 @@ source_file="res://assets/shaders/compute/gerstner_energy.glsl"
 dest_files=["res://.godot/imported/gerstner_energy.glsl-6913036281bc4f25b488a3e7165ea955.res"]
 
 [params]
+

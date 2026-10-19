@@ -1,35 +1,42 @@
-[gd_resource type="ShaderMaterial" load_steps=7 format=4 uid="uid://byumtcccq4ew3"]
+[gd_resource type="ShaderMaterial" format=4 uid="uid://byumtcccq4ew3"]
 
-[ext_resource type="Shader" path="res://assets/shaders/spatial/water.gdshader" id="1_uffek"]
-[ext_resource type="Texture2D" path="res://assets/water/sea_spray.png" id="2_foam_hf"]
-[ext_resource type="Texture2D" path="res://assets/water/foam_breakup_mid.png" id="3_foam_mid"]
-[ext_resource type="Texture2D" path="res://assets/water/foam_breakup_broad.png" id="4_foam_broad"]
+[ext_resource type="Shader" uid="uid://cjhn8nkfr4mn0" path="res://assets/shaders/spatial/water.gdshader" id="1_uffek"]
+[ext_resource type="Texture2D" uid="uid://dtm5tyuh2slqt" path="res://assets/water/sea_spray.png" id="2_foam_hf"]
+[ext_resource type="Texture2D" uid="uid://bgdyrfb515g8s" path="res://assets/water/foam_breakup_mid.png" id="3_foam_mid"]
+[ext_resource type="Texture2D" uid="uid://ceedimj1vww46" path="res://assets/water/foam_breakup_broad.png" id="4_foam_broad"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_foam_lf"]
-noise_type = 1
 seed = 263
 frequency = 0.015
 fractal_octaves = 3
 
 [sub_resource type="NoiseTexture2D" id="NoiseTexture2D_foam_lf"]
-seamless = true
-seamless_blend_skirt = 0.2
 width = 256
 height = 256
 noise = SubResource("FastNoiseLite_foam_lf")
+seamless = true
+seamless_blend_skirt = 0.2
 
 [resource]
 render_priority = 1
 shader = ExtResource("1_uffek")
-shader_parameter/foam_hf_pattern = ExtResource("2_foam_hf")
-shader_parameter/foam_mid_pattern = ExtResource("3_foam_mid")
-shader_parameter/foam_broad_pattern = ExtResource("4_foam_broad")
-shader_parameter/foam_lf_pattern = SubResource("NoiseTexture2D_foam_lf")
-shader_parameter/foam_texture_blend = 1.0
 shader_parameter/roughness = 0.65
 shader_parameter/reflection_roughness = 0.4
 shader_parameter/crest_color = Color(0.219608, 0.729412, 0.760784, 1)
 shader_parameter/crest_scattering_strength = 0.0
 shader_parameter/trough_light_strength = 1.0
 shader_parameter/normal_strength = 1.0
-shader_parameter/map_scales = PackedVector4Array(0.0113636, 0.0113636, 1, 1, 0.0175439, 0.0175439, 0.75, 1, 0.0625, 0.0625, 0, 0.25)
+shader_parameter/foam_hf_pattern = ExtResource("2_foam_hf")
+shader_parameter/foam_mid_pattern = ExtResource("3_foam_mid")
+shader_parameter/foam_broad_pattern = ExtResource("4_foam_broad")
+shader_parameter/foam_lf_pattern = SubResource("NoiseTexture2D_foam_lf")
+shader_parameter/foam_texture_blend = 1.0
+shader_parameter/foam_hf_scale = 0.28
+shader_parameter/foam_lf_scale = 0.02
+shader_parameter/sun_angular_radius = 0.04
+shader_parameter/map_scales = PackedVector4Array(0.011363637, 0.011363637, 1, 1, 0.01754386, 0.01754386, 0.75, 1, 0.0625, 0.0625, 0, 0.25)
+shader_parameter/tir_view_rotation = Basis(1, 0, 0, 0, 1, 0, 0, 0, 1)
+shader_parameter/reflection_distortion = 0.025
+shader_parameter/water_ior = 1.333
+shader_parameter/underwater_absorption = Vector3(0.15, 0.06, 0.03)
+shader_parameter/underwater_fog_color = Color(0.015, 0.075, 0.095, 1)

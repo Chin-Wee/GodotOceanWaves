@@ -12,8 +12,8 @@
 [ext_resource type="Shader" uid="uid://cfkil18smyukv" path="res://assets/shaders/spatial/sea_spray.gdshader" id="8_eu8jb"]
 [ext_resource type="Material" uid="uid://5xqyddws6rt5" path="res://assets/water/mat_spray.tres" id="9_skbf4"]
 [ext_resource type="Texture2D" uid="uid://dtm5tyuh2slqt" path="res://assets/water/sea_spray.png" id="10_spqpo"]
-[ext_resource type="Script" path="res://assets/water/planar_reflection.gd" id="11_reflection"]
-[ext_resource type="Script" path="res://assets/water/interaction_foam.gd" id="12_interaction"]
+[ext_resource type="Script" uid="uid://w1rvoywgpxwg" path="res://assets/water/planar_reflection.gd" id="11_reflection"]
+[ext_resource type="Script" uid="uid://jneujtu610q1" path="res://assets/water/interaction_foam.gd" id="12_interaction"]
 
 [sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_t7jwl"]
 panorama = ExtResource("3_0ksgj")
@@ -110,7 +110,7 @@ fov = 111.406
 script = ExtResource("4_v2yip")
 
 [node name="Water" type="MeshInstance3D" parent="." unique_id=11490753]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1485, 0, 1920)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, 3.5)
 sorting_offset = 999.0
 material_override = ExtResource("5_lt75t")
 cast_shadow = 0
@@ -128,9 +128,10 @@ lifetime = 6.0
 process_material = ExtResource("9_skbf4")
 draw_pass_1 = SubResource("QuadMesh_06d3e")
 
-[node name="PlanarReflection" type="Node" parent="."]
+[node name="PlanarReflection" type="Node" parent="." unique_id=1568965704]
 script = ExtResource("11_reflection")
-[node name="InteractionFoam" type="Node" parent="."]
+
+[node name="InteractionFoam" type="Node" parent="." unique_id=276263720]
 script = ExtResource("12_interaction")
 
 [node name="FogVolume" type="FogVolume" parent="." unique_id=519569375]
