@@ -9,6 +9,7 @@ const SEA_PRESETS := preload('res://assets/water/sea_presets.gd')
 var clipmap_tile_size := 0.5 # Keep mesh recentering aligned with the scaled clipmap.
 var clipmap_scale := 0.052
 var _clipmap_scale := [0.052]
+var _far_coverage := [6.0]
 var _spray_emitter_base_scale := Vector3.ONE
 var previous_tile := Vector3i.MAX
 var should_render_imgui := not Engine.is_editor_hint()
@@ -183,6 +184,9 @@ func _render_imgui() -> void:
 	if ImGui.SliderFloat('##clipmap_scale', _clipmap_scale, 0.01, 1.0):
 		clipmap_scale = _clipmap_scale[0]
 		_apply_clipmap_scale()
+	imgui_text_tooltip('Far Coverage:      ', 'Radially expands outer clipmap rings; local positions through radius 64 stay fixed.'); ImGui.SameLine()
+	if ImGui.SliderFloat('##far_coverage', _far_coverage, 1.0, 8.0):
+		water.material_override.set_shader_parameter('far_coverage', _far_coverage[0])
 	imgui_text_tooltip('Updates per Second:', 'Denotes how many times wave spectrums will be updated per second.\n(0 is uncapped)'); ImGui.SameLine(); if ImGui.SliderFloat('##update_rate', _updates_per_second, 0, 60): water.updates_per_second = _updates_per_second[0]
 	ImGui.Text('Water Color:       '); ImGui.SameLine(); if ImGui.ColorButtonEx('##water_color_button', water.water_color, ImGui.ColorEditFlags_Float, Vector2(ImGui.GetColumnWidth(), ImGui.GetFrameHeight())): ImGui.OpenPopup('water_color_picker')
 	if ImGui.BeginPopup('water_color_picker'):

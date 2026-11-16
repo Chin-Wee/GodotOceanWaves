@@ -89,10 +89,11 @@ func _capture(scene : Node3D, matching_camera : Transform3D) -> void:
 	var red_sun : Image = await _save('daylight-red-sun')
 	assert(no_sun.get_data() != red_sun.get_data(), 'Sun energy and color must change the render')
 	scene.get_node('Sun').light_color = scene.SEA_PRESETS.DAYLIGHT_OCEAN.sun.light_color
-	scene.get_node('Sun').rotation_degrees = scene.SEA_PRESETS.DAYLIGHT_OCEAN.sun.rotation_degrees + Vector3(0, 180, 0)
-	var front_lit : Image = await _save('daylight-front-lit')
+	# An overhead sun keeps dot(LIGHT, -VIEW) <= 0 across the view, including newly visible far water.
+	scene.get_node('Sun').rotation_degrees = Vector3(-90.0, 0.0, 0.0)
+	var front_lit : Image = await _save('daylight-overhead-lit')
 	water.material_override.set_shader_parameter('crest_scattering_strength', 0.0)
-	var front_lit_no_crest : Image = await _save('daylight-front-lit-no-crest')
+	var front_lit_no_crest : Image = await _save('daylight-overhead-lit-no-crest')
 	assert(front_lit.get_data() == front_lit_no_crest.get_data(), 'Crest contribution must vanish without backlighting')
 	print('PASS: rendered crest contribution, directional suppression and sunlight response')
 

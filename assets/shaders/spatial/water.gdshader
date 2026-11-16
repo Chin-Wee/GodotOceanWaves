@@ -26,6 +26,7 @@ uniform float foam_texture_blend : hint_range(0.0, 1.0) = 1.0;
 uniform float foam_hf_scale : hint_range(0.01, 1.0) = 0.28;
 uniform float foam_lf_scale : hint_range(0.001, 0.1) = 0.02;
 uniform float sun_angular_radius : hint_range(0.0, 0.2) = 0.04;
+uniform float far_coverage : hint_range(1.0, 8.0) = 6.0;
 
 group_uniforms cascade_data;
 uniform vec4 map_scales[MAX_CASCADES];               // Scales for displacement/normal maps. Packed: [uv scale, displacement scale, normal scale]
@@ -55,6 +56,18 @@ varying float camera_depth;
 varying float camera_underwater;
 
 void vertex() {
+	vec2 clipmap_scale = vec2(MODEL_MATRIX[0].x, MODEL_MATRIX[2].z);
+	vec2 clipmap_local = (VERTEX.xz - MODEL_MATRIX[3].xz) / clipmap_scale;
+	float radius = length(clipmap_local);
+	if (radius > 64.0) {
+		// Crest (SIGGRAPH 2017) pairs geometry LOD with displacement texture LOD; extend this camera-centered clipmap's far rings.
+		float d = radius - 64.0;
+		float u = clamp(d / 192.0, 0.0, 1.0);
+		float s = u*u*(3.0 - 2.0*u);
+		float mapped_radius = 64.0 + d * (1.0 + (far_coverage - 1.0) * s);
+		clipmap_local *= mapped_radius / radius;
+		VERTEX.xz = MODEL_MATRIX[3].xz + clipmap_local * clipmap_scale;
+	}
 	UV = VERTEX.xz;
 
 	// Read displacements from displacement maps.
