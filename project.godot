@@ -77,11 +77,11 @@ foam_states={
 }
 water_color={
 "type": "color",
-"value": Color(0.0100228, 0.0196066, 0.0272118, 1)
+	"value": Color(0.00182116, 0.06662594, 0.11443536, 1)
 }
 foam_color={
 "type": "color",
-"value": Color(0, 0, 0, 1)
+	"value": Color(0.81484652, 0.86315715, 0.78353781, 1)
 }
 num_cascades={
 "type": "uint",
