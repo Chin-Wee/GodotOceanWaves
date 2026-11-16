@@ -12,10 +12,10 @@ const GERSTNER_WAVE_GENERATOR := preload('res://assets/water/gerstner_wave_gener
 enum MeshQuality { LOW, HIGH }
 
 @export_group('Wave Parameters')
-@export_color_no_alpha var water_color : Color = Color(0.1, 0.15, 0.18) :
+@export_color_no_alpha var water_color : Color = Color('#06495F') :
 	set(value): water_color = value; RenderingServer.global_shader_parameter_set(&'water_color', water_color.srgb_to_linear())
 
-@export_color_no_alpha var foam_color : Color = Color(0.73, 0.67, 0.62) :
+@export_color_no_alpha var foam_color : Color = Color('#E9EFE5') :
 	set(value): foam_color = value; RenderingServer.global_shader_parameter_set(&'foam_color', foam_color.srgb_to_linear())
 
 ## The parameters for wave cascades. Each parameter set represents one cascade.

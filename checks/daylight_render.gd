@@ -1,8 +1,8 @@
 extends SceneTree
-## Full-quality, matched-camera A/B timings. Add -- --capture for fixed-time PNG comparisons.
+## Full-quality Daylight Ocean timings. Add -- --capture for fixed-time PNG comparisons.
 ## Run without --headless, with --disable-vsync, and no other GPU workload.
 
-var output := 'user://daylight-validation/' + RenderingServer.get_current_rendering_method() + '-' + RenderingServer.get_current_rendering_driver_name()
+var output := 'user://daylight-only-validation/' + RenderingServer.get_current_rendering_method() + '-' + RenderingServer.get_current_rendering_driver_name()
 
 func _initialize() -> void:
 	_run.call_deferred()
@@ -41,71 +41,68 @@ func _check_freecam_look(scene : Node3D, reference : Image) -> void:
 func _capture(scene : Node3D, matching_camera : Transform3D) -> void:
 	var water : MeshInstance3D = scene.water
 	water.set_process(false)
-	for index in [0, 1]:
-		scene._apply_sea_preset(index)
-		scene.camera.transform = matching_camera
-		water.wave_generator.set_process(false)
-		var spray : GPUParticles3D = scene.get_node('Water/WaterSprayEmitter')
-		spray.use_fixed_seed = true
-		spray.seed = 1234
-		spray.restart()
-		for step in 480:
-			# Exact 60 Hz simulation, completing all three cascades before the next frame.
-			water._update_water(1.0/60.0)
-			for cascade in 3: water.wave_generator._process(0.0)
-			await process_frame
-			if step + 1 in [240, 360, 480]:
-				var prefix := 'original' if index == 0 else 'daylight'
-				await _save(prefix + '-' + str((step + 1)/60))
-				# Diagnostic only: display existing foam alpha without lighting or grading.
-				var shader : Shader = water.material_override.shader
-				var mask_shader := Shader.new()
-				mask_shader.code = shader.code.replace('world_vertex_coords, shadows_disabled', 'world_vertex_coords, unshaded, fog_disabled').replace('ALBEDO = max(mix(water_color.rgb, foam_color.rgb, foam_factor), vec3(1e-4));', 'ALBEDO = vec3(foam_factor);')
-				water.material_override.shader = mask_shader
-				var grading : bool = scene.get_node('Environment').environment.adjustment_enabled
-				scene.get_node('Environment').environment.adjustment_enabled = false
-				spray.visible = false
-				var mask : Image = await _save(prefix + '-foam-' + str((step + 1)/60))
-				if index == 1 and step + 1 == 240: await _check_freecam_look(scene, mask)
-				water.material_override.shader = shader
-				scene.get_node('Environment').environment.adjustment_enabled = grading
-				spray.visible = true
-		if index == 1:
-			scene.set_process(false)
-			spray.visible = false # Isolate frozen water lighting from TIME-driven spray variation.
-			var lit_image : Image = await _save('daylight-light-control')
-			water.material_override.set_shader_parameter('crest_scattering_strength', 0.0)
-			var no_crest : Image = await _save('daylight-no-crest')
-			assert(lit_image.get_data() != no_crest.get_data(), 'Crest scattering must change the render')
-			water.material_override.set_shader_parameter('crest_scattering_strength', 0.65)
-			water.material_override.set_shader_parameter('roughness', 0.0)
-			water.material_override.set_shader_parameter('reflection_roughness', 0.0)
-			scene.camera.rotation.x = deg_to_rad(-1.0)
-			await _save('daylight-grazing-min-roughness')
-			scene.camera.transform = matching_camera
-			water.material_override.set_shader_parameter('roughness', 0.25)
-			water.material_override.set_shader_parameter('reflection_roughness', 0.20)
-			scene.get_node('Sun').light_energy = 0.0
-			var no_sun : Image = await _save('daylight-no-sun')
-			scene.get_node('Sun').light_color = Color.RED
-			scene.get_node('Sun').light_energy = 1.0
-			var red_sun : Image = await _save('daylight-red-sun')
-			assert(no_sun.get_data() != red_sun.get_data(), 'Sun energy and color must change the render')
-			scene.get_node('Sun').light_color = scene.SEA_PRESETS.PRESETS[0].sun.light_color
-			scene.get_node('Sun').rotation_degrees = scene.SEA_PRESETS.PRESETS[0].sun.rotation_degrees + Vector3(0, 180, 0)
-			var front_lit : Image = await _save('daylight-front-lit')
-			water.material_override.set_shader_parameter('crest_scattering_strength', 0.0)
-			var front_lit_no_crest : Image = await _save('daylight-front-lit-no-crest')
-			assert(front_lit.get_data() == front_lit_no_crest.get_data(), 'Crest contribution must vanish without backlighting')
-			print('PASS: rendered crest contribution, directional suppression and sunlight response')
+	scene._apply_daylight_ocean()
+	scene.camera.transform = matching_camera
+	water.wave_generator.set_process(false)
+	var spray : GPUParticles3D = scene.get_node('Water/WaterSprayEmitter')
+	spray.use_fixed_seed = true
+	spray.seed = 1234
+	spray.restart()
+	for step in 480:
+		# Exact 60 Hz simulation, completing all three cascades before the next frame.
+		water._update_water(1.0/60.0)
+		for cascade in 3: water.wave_generator._process(0.0)
+		await process_frame
+		if step + 1 in [240, 360, 480]:
+			var prefix := 'daylight'
+			await _save(prefix + '-' + str((step + 1)/60))
+			# Diagnostic only: display existing foam alpha without lighting or grading.
+			var shader : Shader = water.material_override.shader
+			var mask_shader := Shader.new()
+			mask_shader.code = shader.code.replace('world_vertex_coords, shadows_disabled', 'world_vertex_coords, unshaded, fog_disabled').replace('ALBEDO = max(mix(water_color.rgb, foam_color.rgb, foam_factor), vec3(1e-4));', 'ALBEDO = vec3(foam_factor);')
+			water.material_override.shader = mask_shader
+			var grading : bool = scene.get_node('Environment').environment.adjustment_enabled
+			scene.get_node('Environment').environment.adjustment_enabled = false
+			spray.visible = false
+			var mask : Image = await _save(prefix + '-foam-' + str((step + 1)/60))
+			if step + 1 == 240: await _check_freecam_look(scene, mask)
+			water.material_override.shader = shader
+			scene.get_node('Environment').environment.adjustment_enabled = grading
+			spray.visible = true
+	scene.set_process(false)
+	spray.visible = false # Isolate frozen water lighting from TIME-driven spray variation.
+	var lit_image : Image = await _save('daylight-light-control')
+	water.material_override.set_shader_parameter('crest_scattering_strength', 0.0)
+	var no_crest : Image = await _save('daylight-no-crest')
+	assert(lit_image.get_data() != no_crest.get_data(), 'Crest scattering must change the render')
+	water.material_override.set_shader_parameter('crest_scattering_strength', 0.65)
+	water.material_override.set_shader_parameter('roughness', 0.0)
+	water.material_override.set_shader_parameter('reflection_roughness', 0.0)
+	scene.camera.rotation.x = deg_to_rad(-1.0)
+	await _save('daylight-grazing-min-roughness')
+	scene.camera.transform = matching_camera
+	water.material_override.set_shader_parameter('roughness', 0.25)
+	water.material_override.set_shader_parameter('reflection_roughness', 0.20)
+	scene.get_node('Sun').light_energy = 0.0
+	var no_sun : Image = await _save('daylight-no-sun')
+	scene.get_node('Sun').light_color = Color.RED
+	scene.get_node('Sun').light_energy = 1.0
+	var red_sun : Image = await _save('daylight-red-sun')
+	assert(no_sun.get_data() != red_sun.get_data(), 'Sun energy and color must change the render')
+	scene.get_node('Sun').light_color = scene.SEA_PRESETS.DAYLIGHT_OCEAN.sun.light_color
+	scene.get_node('Sun').rotation_degrees = scene.SEA_PRESETS.DAYLIGHT_OCEAN.sun.rotation_degrees + Vector3(0, 180, 0)
+	var front_lit : Image = await _save('daylight-front-lit')
+	water.material_override.set_shader_parameter('crest_scattering_strength', 0.0)
+	var front_lit_no_crest : Image = await _save('daylight-front-lit-no-crest')
+	assert(front_lit.get_data() == front_lit_no_crest.get_data(), 'Crest contribution must vanish without backlighting')
+	print('PASS: rendered crest contribution, directional suppression and sunlight response')
 
 func _benchmark(scene : Node3D, matching_camera : Transform3D) -> void:
 	var viewport_rid := root.get_viewport_rid()
 	RenderingServer.viewport_set_measure_render_time(viewport_rid, true)
 	var results : Array = []
-	# Reverse the second pair to expose ordering/thermal bias.
-	for index in [0, 1, 1, 0]:
-		scene._apply_sea_preset(index)
+	for sample_index in range(4):
+		scene._apply_daylight_ocean()
 		scene.camera.transform = matching_camera
 		await create_timer(4.0).timeout
 		var frames := 0
@@ -129,7 +126,7 @@ func _benchmark(scene : Node3D, matching_camera : Transform3D) -> void:
 			gpu_ms += timing.y
 		frame_ms.sort()
 		var result := {
-			'preset': index, 'frames': frames, 'mean_frame_ms': (previous - start)/1000.0/frames,
+			'preset': 'Daylight Ocean', 'sample': sample_index + 1, 'frames': frames, 'mean_frame_ms': (previous - start)/1000.0/frames,
 			'p95_frame_ms': frame_ms[int(frames*0.95)],
 			'viewport_cpu_ms': cpu_ms/frames, 'viewport_gpu_ms': gpu_ms/frames,
 			'draw_calls': Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME),

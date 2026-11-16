@@ -3,8 +3,6 @@ extends Node3D
 
 const SEA_PRESETS := preload('res://assets/water/sea_presets.gd')
 
-## Applied when running the scene. Runtime sliders can still override the preset.
-@export_enum('Scene Defaults', 'Daylight Ocean') var sea_preset := 1
 @export_enum('Calm', 'Normal', 'Storm') var sea_state := 2
 
 # Sea of Thieves is the visual reference; this trades far-water coverage for denser close crests.
@@ -14,7 +12,6 @@ var _clipmap_scale := [0.052]
 var _spray_emitter_base_scale := Vector3.ONE
 var previous_tile := Vector3i.MAX
 var should_render_imgui := not Engine.is_editor_hint()
-var _scene_preset : Dictionary
 var _sea_state_baseline: Array[Dictionary] = []
 
 @onready var viewport : Variant = Engine.get_singleton(&'EditorInterface').get_editor_viewport_3d(0) if Engine.is_editor_hint() else get_viewport()
@@ -37,11 +34,13 @@ func _init() -> void:
 	DisplayServer.window_set_position(DisplayServer.screen_get_size() * 0.25 / 2.0)
 
 func _ready() -> void:
-	if Engine.is_editor_hint(): return
-	_scene_preset = _capture_scene_preset()
-	_apply_sea_preset(sea_preset if sea_preset in [0, 1] else 0)
+	if Engine.is_editor_hint():
+		camera.global_transform = $Camera.global_transform
+		camera.fov = $Camera.fov
+		return
 	_spray_emitter_base_scale = $Water/WaterSprayEmitter.scale
 	_apply_clipmap_scale()
+	_apply_daylight_ocean()
 
 func _apply_clipmap_scale() -> void:
 	water.scale = Vector3(clipmap_scale, 1.0, clipmap_scale)
@@ -51,29 +50,8 @@ func _apply_clipmap_scale() -> void:
 	$Water/WaterSprayEmitter.scale = spray_scale
 	clipmap_tile_size = clipmap_scale * (1.0 if water.mesh_quality == water.MeshQuality.HIGH else 4.0)
 
-func _capture_scene_preset() -> Dictionary:
-	var snapshot := {
-		'water_color': water.water_color, 'foam_color': water.foam_color,
-		'material': {}, 'environment': {}, 'sun': {}, 'cascades': [],
-		'sky': $Environment.environment.sky.duplicate(true),
-		'camera': {'transform': camera.transform, 'fov': camera.fov},
-		'spray_visible': $Water/WaterSprayEmitter.visible,
-		'fog_volume_visible': $FogVolume.visible,
-	}
-	var reference : Dictionary = SEA_PRESETS.PRESETS[0]
-	for uniform in reference.material:
-		snapshot.material[uniform] = water.material_override.get_shader_parameter(uniform)
-	for property in reference.environment:
-		snapshot.environment[property] = $Environment.environment.get(property)
-	for property in reference.sun:
-		snapshot.sun[property] = $Sun.get(property)
-	for params in water.parameters:
-		snapshot.cascades.append(params.duplicate())
-	return snapshot
-
-func _apply_sea_preset(index : int) -> void:
-	if index < 0 or index > SEA_PRESETS.PRESETS.size(): return
-	var preset : Dictionary = _scene_preset if index == 0 else SEA_PRESETS.PRESETS[index - 1]
+func _apply_daylight_ocean() -> void:
+	var preset: Dictionary = SEA_PRESETS.DAYLIGHT_OCEAN
 	var cascades : Array[WaveCascadeParameters] = []
 	for definition in preset.cascades:
 		if definition is WaveCascadeParameters:
@@ -96,15 +74,12 @@ func _apply_sea_preset(index : int) -> void:
 	for property in preset.sun:
 		$Sun.set(property, preset.sun[property])
 	$Environment.environment.sky = preset.sky.duplicate(true)
-	camera.transform = _scene_preset.camera.transform
 	camera.fov = preset.camera.fov
-	if index != 0:
-		camera.position.y = preset.camera.height
-		camera.rotation.x = deg_to_rad(preset.camera.pitch_degrees)
+	camera.position.y = preset.camera.height
+	camera.rotation.x = deg_to_rad(preset.camera.pitch_degrees)
 	_camera_fov[0] = camera.fov
 	$Water/WaterSprayEmitter.visible = preset.spray_visible
 	$FogVolume.visible = preset.get('fog_volume_visible', false)
-	sea_preset = index
 	_capture_sea_state_baseline()
 	_apply_sea_state(sea_state)
 	_water_color = [water.water_color.r, water.water_color.g, water.water_color.b]
@@ -146,6 +121,7 @@ func _process(delta : float) -> void:
 		camera.enable_camera_movement = not should_render_imgui or not (io.WantCaptureMouse or io.WantCaptureKeyboard)
 
 func _physics_process(delta: float) -> void:
+	if Engine.is_editor_hint(): return
 	# Shift water mesh whenever player moves into a new tile.
 	var tile := (Vector3(camera.global_position.x, 0.0, camera.global_position.z) / clipmap_tile_size).ceil()
 	if not tile.is_equal_approx(previous_tile):
@@ -178,14 +154,7 @@ func _render_imgui() -> void:
 	ImGui.SetWindowPos(Vector2(20, 20))
 	ImGui.SeparatorText('OceanWaves')
 	ImGui.Text('FPS:                %d (%s)' % [fps, '%.2fms' % (1.0 / fps*1e3)])
-	imgui_text_tooltip('Sea Preset:        ', 'Re-select a preset to reset your manual tweaks.\nWave resolution, mesh quality and update rate are controlled separately.'); ImGui.SameLine()
-	var preset_name : String = 'Scene Defaults' if sea_preset == 0 else SEA_PRESETS.PRESETS[sea_preset - 1].name
-	if ImGui.BeginCombo('##sea_preset', preset_name):
-		for preset_index in range(SEA_PRESETS.PRESETS.size() + 1):
-			var label : String = 'Scene Defaults' if preset_index == 0 else SEA_PRESETS.PRESETS[preset_index - 1].name
-			if ImGui.Selectable(label): _apply_sea_preset(preset_index)
-		ImGui.EndCombo()
-	if sea_preset != 0: ImGui.Text(SEA_PRESETS.PRESETS[sea_preset - 1].description)
+	imgui_text_tooltip('Sea Preset: Daylight Ocean', SEA_PRESETS.DAYLIGHT_OCEAN.description)
 	imgui_text_tooltip('Sea State:         ', 'Scales wave height and choppiness, then tunes Jacobian foam persistence.'); ImGui.SameLine()
 	if ImGui.BeginCombo('##sea_state', SEA_PRESETS.SEA_STATES[sea_state].name):
 		for state_index in SEA_PRESETS.SEA_STATES.size():

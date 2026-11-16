@@ -3,18 +3,11 @@ An open ocean rendering experiment in the Godot Engine utilizing the inverse Fou
 
 [ocean_demo.mp4](https://github.com/user-attachments/assets/a8083878-a297-4536-a481-9123cea7e7df)
 
-## Sea presets
+## Water setup
 
-Run the scene and use **Sea Preset** and **Sea State** at the top of the OceanWaves panel:
+**Daylight Ocean is the only water setup** and is applied in the editor viewport and at runtime. The **Sea State** control selects Calm, Normal or Storm wave and foam tuning; Storm is the default. Wave generation starts from seed **1234** and the authored cascade time offsets.
 
-| Preset | Appearance |
-| --- | --- |
-| Scene Defaults | Original authored waves, palette, evening panorama, camera and fog |
-| Daylight Ocean | Blue troughs, cyan crests, area-sun glints and sparse breaking foam |
-
-**Daylight Ocean and Storm load at startup.** The **Sea Preset** property selects the scene look; **Sea State** independently selects Calm, Normal or Storm wave and foam tuning. Re-selecting a preset resets its colors, material, camera, sky, sun, fog, spray and cascade values. Scene Defaults restores the settings captured before the startup preset. Preset changes reset the generator to seed **1234** and the original cascade time offsets.
-
-Preset values live in [assets/water/sea_presets.gd](assets/water/sea_presets.gd). Startup uses 1024² FFT resolution, High mesh quality, enabled sea spray, clipmap scale **0.052**, and **60 updates/s**. The camera starts at **(−0.13, 12.87, −23.16)** with a **111.406°** FOV. Under the startup Storm state, Cascade 1 displays **88 m** tile lengths, **0.844** displacement, **0.927** choppiness, **0.385** normal scale, wind speed **10**, direction **20°**, fetch **150**, swell **0.8**, spread **0.2**, detail **1**, whitecap **0.650**, foam amount **8**, decay **3.325**, and dispersion **5.260**. Foam is injected only by the FFT displacement Jacobian into a dedicated ping-pong texture array: R holds persistent foam and G holds fresh breaking. Feedback progressively blurs and decays R; fresh G drives spray. Fresh foam blends the inspected `sea_spray.png` alpha with two seamless authored grayscale breakup maps; aged foam fades into seamless FastNoiseLite noise.
+Daylight values live in [assets/water/sea_presets.gd](assets/water/sea_presets.gd). Startup uses 1024² FFT resolution, High mesh quality, enabled sea spray, clipmap scale **0.052**, and **60 updates/s**. The camera starts at **(−0.13, 12.87, −23.16)** with a **111.406°** FOV. Under the startup Storm state, Cascade 1 displays **88 m** tile lengths, **0.844** displacement, **0.927** choppiness, **0.385** normal scale, wind speed **10**, direction **20°**, fetch **150**, swell **0.8**, spread **0.2**, detail **1**, whitecap **0.650**, foam amount **8**, decay **3.325**, and dispersion **5.260**. Foam is injected only by the FFT displacement Jacobian into a dedicated ping-pong texture array: R holds persistent foam and G holds fresh breaking. Feedback progressively blurs and decays R; fresh G drives spray. Fresh foam blends the inspected `sea_spray.png` alpha with two seamless authored grayscale breakup maps; aged foam fades into seamless FastNoiseLite noise.
 
 The production reference is [Rare's Sea of Thieves water rendering](https://history.siggraph.org/wp-content/uploads/2022/09/2018-Talks-Ang_The-Technical-Art-of-Sea-of-Thieves.pdf): FFT geometry, choppiness-driven peak scattering, camera-centered depth contacts, feedback-blurred foam and an area-sun highlight. This project keeps the existing opaque FFT surface and art-directed scattering model.
 
@@ -24,14 +17,14 @@ Select **Water → Material Override → Shader Parameters** in the Inspector:
 
 | Control | Daylight value | Effect |
 | --- | --- | --- |
-| Roughness | 0.25 | Direct sun highlight width |
-| Reflection Roughness | 0.20 | Sky reflection blur |
+| Roughness | 0.35 | Direct sun highlight width |
+| Reflection Roughness | 0.38 | Sky reflection blur |
 | Crest Color | `#38BAC2` | Independent cyan light through elevated, backlit crests |
-| Crest Scattering Strength | 0.65 | Crest light intensity; zero disables it |
+| Crest Scattering Strength | 2.0 | Crest light intensity; zero disables it |
 | Normal Strength | 1.0 | Fine surface detail |
 | Trough Light Strength | 0.4 | Minimum diffuse/ambient light in deep troughs; cyan transmitted light remains separate |
 
-Foam blends both roughness controls toward **0.85**. Angle inputs and effective roughness are bounded to avoid singularities. Smith masking arguments are corrected, and direct highlights now follow Godot's `LIGHT_COLOR` (including sunlight color and energy). Render checks also identified broad white highlights from using the surface viewing angle for direct Fresnel; direct highlights now use the light half-vector and perceptual roughness conversion (`alpha = roughness²`), following Godot's built-in GGX model. Those correctness fixes apply to Scene Defaults too.
+Foam blends both roughness controls toward **0.85**. Angle inputs and effective roughness are bounded to avoid singularities. Smith masking arguments are corrected, and direct highlights now follow Godot's `LIGHT_COLOR` (including sunlight color and energy). Render checks also identified broad white highlights from using the surface viewing angle for direct Fresnel; direct highlights now use the light half-vector and perceptual roughness conversion (`alpha = roughness²`), following Godot's built-in GGX model.
 
 The Water node exposes deep-water (`#06495F`) and foam (`#E9EFE5`) colors. Cascade Resources and runtime tabs contain choppiness, Jacobian threshold, foam amount, decay and dispersion. Calm suppresses open-ocean injection; interaction foam remains independent. Storm raises wave amplitude and choppiness while increasing foam injection and spread. Daylight keeps the authored yaw with a **12° down** pitch; its startup height and FOV are **12.87 m** and **111.406°**.
 
@@ -43,7 +36,7 @@ Run `Godot --path . --script res://checks/panel_input.gd` to check panel clicks,
 
 ### Freecam, foam and reflections
 
-**RMB** looks around; **WASD** moves, **Q/E** descends/ascends, **Shift** boosts speed and the mouse wheel changes speed. Waves keep animating. The existing world-coordinate FFT sampling and camera-following clipmap are retained. Camera-driven attenuation of displacement, normal strength and foam has been removed: moving or pitching the camera no longer changes those wave-field values. Perspective, reflections and highlights still respond to the view. The mesh retains its existing coarse outer rings.
+**RMB** looks around; **WASD** moves, **Q/E** descends/ascends, **Shift** boosts speed and the mouse wheel changes speed. Waves keep animating. The existing world-coordinate FFT sampling and camera-following clipmap are retained. Camera-driven attenuation of displacement, normal strength and foam has been removed: moving or pitching the camera no longer changes those wave-field values. Perspective, reflections and highlights still respond to the view. The high-quality mesh keeps its existing footprint with denser outer-ring geometry.
 
 The three sea states scale vertical wave amplitude and horizontal choppiness, then tune Jacobian threshold, injection, decay, dispersion and texture age blend. Peak scattering uses a normalized horizontal-displacement mask stored in the displacement alpha channel. A camera-centered top-down depth pass writes a separate interaction-foam history in world-plane UVs; advection, blur and half-life decay preserve trails as the camera moves. A planar SubViewport supplies above-water reflection and the view used for the underwater Snell cone; absorption and fog tint the refracted result. A depth pass clips waterline-crossing geometry; clipped pixels use sky, so another object behind that clipped surface can be hidden. Sea spray reads only fresh foam from G.
 
@@ -62,33 +55,33 @@ godot --headless --path . --script res://checks/reflection_underwater.gd
 godot --path . --script res://checks/sea_presets.gd --audio-driver Dummy
 godot --path . --script res://checks/interaction_foam.gd --audio-driver Dummy
 godot --path . --script res://checks/sea_presets.gd --audio-driver Dummy --rendering-method mobile
-# A/B timings: same 1920×1080 camera, full original quality, four 10-second samples.
+# Daylight timings: same 1920×1080 camera, four 10-second samples.
 godot --path . --script res://checks/daylight_render.gd --audio-driver Dummy --disable-vsync
 godot --path . --script res://checks/daylight_render.gd --audio-driver Dummy --disable-vsync --rendering-method mobile
-# Fixed 60 Hz simulation: compare 4/6/8-second phases and diagnostic foam/light images.
+# Fixed 60 Hz simulation: capture 4/6/8-second phases and diagnostic foam/light images.
 godot --path . --script res://checks/daylight_render.gd --audio-driver Dummy --disable-vsync --max-fps 60 -- --capture
 ```
 
-The switch check covers repeated selection, deterministic seeds, manual edits, camera/material/sky restoration, color-slider synchronization and invalid indices. Capture mode matches camera, seed, simulation time, FFT resolution, mesh quality, update cadence and particle count. Output is in the printed `user://daylight-validation` folder. Timings report wall-clock frame mean/P95 separately from measured viewport CPU/GPU time. Only compare benchmark samples with `render_timing_reliable: true`; unchanged/unavailable timestamps are flagged. A zero GPU timestamp means unavailable measurement; viewport time does not include every external FFT compute operation. The check temporarily keeps its window above other windows to avoid occluded-window timing samples. Keep other GPU workloads closed for comparisons. On this Godot/Metal build, readback fences and GPU timestamps can fail; `--rendering-driver vulkan` provides an alternative when validating on macOS. Mobile renderer results on a desktop do not establish phone performance; measure the target device before setting production budgets.
+The water check covers startup with the sole Daylight setup, deterministic seeds and sea-state changes. Capture mode matches camera, seed, simulation time, FFT resolution, mesh quality, update cadence and particle count. Output is in the printed `user://daylight-only-validation` folder. Timings report wall-clock frame mean/P95 separately from measured viewport CPU/GPU time. Only compare benchmark samples with `render_timing_reliable: true`; unchanged/unavailable timestamps are flagged. A zero GPU timestamp means unavailable measurement; viewport time does not include every external FFT compute operation. The check temporarily keeps its window above other windows to avoid occluded-window timing samples. Keep other GPU workloads closed for comparisons. On this Godot/Metal build, readback fences and GPU timestamps can fail; `--rendering-driver vulkan` provides an alternative when validating on macOS. Mobile renderer results on a desktop do not establish phone performance; measure the target device before setting production budgets.
 
 ### Earlier validation — 2026-10-05 (source revision 7d48a1e)
 
 These timings and foam percentages describe an earlier sparse-foam revision and do not measure the current feedback, reflection or interaction passes.
 
-Godot **4.7.stable.official.5b4e0cb0f**, Apple **M5**, Vulkan/MoltenVK, **1920×1080**. Both presets used the Daylight camera, seed 1234, 1024² FFT, High mesh, 50 Hz and 32,768 particles. Two 10-second samples per preset, with 4-second warmups and reversed second-pair order; means below are weighted by frame count.
+Godot **4.7.stable.official.5b4e0cb0f**, Apple **M5**, Vulkan/MoltenVK, **1920×1080**. This archived comparison predates the single-setup change: it measured the old scene defaults against Daylight Ocean using the Daylight camera, seed 1234, 1024² FFT, High mesh, 50 Hz and 32,768 particles. Two 10-second samples per look, with 4-second warmups and reversed second-pair order; means below are weighted by frame count.
 
 | Renderer | Preset | Whole-frame mean | Frame P95 range | Viewport GPU mean |
 | --- | --- | --- | --- | --- |
-| Forward+ | Scene Defaults | 7.64 ms | 8.50–16.52 ms | 3.06 ms |
+| Forward+ | Legacy Scene Defaults | 7.64 ms | 8.50–16.52 ms | 3.06 ms |
 | Forward+ | Daylight Ocean | 7.71 ms | 16.24–16.94 ms | 2.72 ms |
-| Mobile | Scene Defaults | 8.34 ms | 9.23–9.30 ms | 1.58 ms |
+| Mobile | Legacy Scene Defaults | 8.34 ms | 9.23–9.30 ms | 1.58 ms |
 | Mobile | Daylight Ocean | 8.59 ms | 9.17–11.77 ms | 1.70 ms |
 
 Draw calls stayed at **3**. Whole-frame samples include simulation, rendering and desktop presentation variability; viewport GPU timestamps exclude external FFT compute work. These desktop samples do not demonstrate a phone budget or a reliable speedup. Native Metal smoke checks passed, but its GPU timestamps were unavailable and capture fence errors required Vulkan for the comparable measurements.
 
 The earlier sparse-foam revision's matched captures at **4 / 6 / 8 seconds** show blue troughs, cyan elevated faces, fine glints and broken crest ribbons. Diagnostic foam coverage in the fixed ocean rectangle (rows 450–1079, full width; display-space mask > 0.25) changed from **65.33 / 33.15 / 42.54%** to **24.87 / 1.82 / 0.86%**: about **80% less average visible coverage**. This is a screen-space comparison from that older revision, not a physical foam-area measurement or current baseline.
 
-Forward+ and Mobile captures passed directional crest-light suppression, sunlight energy/color response and minimum-roughness/grazing checks. Repeated switching, restoration after manual edits, color synchronization, seeded resets and invalid selections passed in both renderers. Mobile warns about the original scene's volumetric fog while loading Scene Defaults; Daylight uses supported depth haze. Scattering and trough darkness remain art-directed approximations on opaque FFT water.
+Forward+ and Mobile captures passed directional crest-light suppression, sunlight energy/color response and minimum-roughness/grazing checks. Repeated switching, restoration after manual edits, color synchronization, seeded resets and invalid selections passed in both renderers. The archived Mobile run warned about volumetric fog in the removed scene-default baseline; the active Daylight setup uses supported depth haze. Scattering and trough darkness remain art-directed approximations on opaque FFT water.
 
 ## Introduction
 ### Why Fourier Transforms?
@@ -186,5 +179,4 @@ The displacement, normal, and foam maps generated after running FFT on our direc
 
 ## Attribution
 **[Kloofendal 48d Partly Cloudy (Pure Sky)](https://polyhaven.com/a/kloofendal_48d_partly_cloudy_puresky)** by **Greg Zaal** (original) and **Jarod Guest** (sky edits), from Poly Haven, is used under **[CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/)**. The source is the tonemapped JPG; the Godot import is limited to 4096 px.\
-**[Evening Road 01 (Pure Sky)](https://polyhaven.com/a/evening_road_01_puresky)** by **Jarod Guest** is used under the [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) license.\
 **[OTFFT DIT Stockham Algorithm](http://wwwa.pikara.ne.jp/okojisan/otfft-en/stockham3.html)** by **Takuya Okahisa** is used and modified under the [MIT](http://wwwa.pikara.ne.jp/okojisan/otfft-en/download.html) license.
