@@ -17,10 +17,10 @@ Select **Water → Material Override → Shader Parameters** in the Inspector:
 
 | Control | Daylight value | Effect |
 | --- | --- | --- |
-| Roughness | 0.25 | Direct sun highlight width |
-| Reflection Roughness | 0.20 | Sky reflection blur |
+| Roughness | 0.35 | Direct sun highlight width |
+| Reflection Roughness | 0.38 | Sky reflection blur |
 | Crest Color | `#38BAC2` | Independent cyan light through elevated, backlit crests |
-| Crest Scattering Strength | 0.65 | Crest light intensity; zero disables it |
+| Crest Scattering Strength | 2.0 | Crest light intensity; zero disables it |
 | Normal Strength | 1.0 | Fine surface detail |
 | Trough Light Strength | 0.4 | Minimum diffuse/ambient light in deep troughs; cyan transmitted light remains separate |
 
@@ -62,7 +62,7 @@ godot --path . --script res://checks/daylight_render.gd --audio-driver Dummy --d
 godot --path . --script res://checks/daylight_render.gd --audio-driver Dummy --disable-vsync --max-fps 60 -- --capture
 ```
 
-The water check covers startup with the sole Daylight setup, deterministic seeds and sea-state changes. Capture mode matches camera, seed, simulation time, FFT resolution, mesh quality, update cadence and particle count. Output is in the printed `user://daylight-validation` folder. Timings report wall-clock frame mean/P95 separately from measured viewport CPU/GPU time. Only compare benchmark samples with `render_timing_reliable: true`; unchanged/unavailable timestamps are flagged. A zero GPU timestamp means unavailable measurement; viewport time does not include every external FFT compute operation. The check temporarily keeps its window above other windows to avoid occluded-window timing samples. Keep other GPU workloads closed for comparisons. On this Godot/Metal build, readback fences and GPU timestamps can fail; `--rendering-driver vulkan` provides an alternative when validating on macOS. Mobile renderer results on a desktop do not establish phone performance; measure the target device before setting production budgets.
+The water check covers startup with the sole Daylight setup, deterministic seeds and sea-state changes. Capture mode matches camera, seed, simulation time, FFT resolution, mesh quality, update cadence and particle count. Output is in the printed `user://daylight-only-validation` folder. Timings report wall-clock frame mean/P95 separately from measured viewport CPU/GPU time. Only compare benchmark samples with `render_timing_reliable: true`; unchanged/unavailable timestamps are flagged. A zero GPU timestamp means unavailable measurement; viewport time does not include every external FFT compute operation. The check temporarily keeps its window above other windows to avoid occluded-window timing samples. Keep other GPU workloads closed for comparisons. On this Godot/Metal build, readback fences and GPU timestamps can fail; `--rendering-driver vulkan` provides an alternative when validating on macOS. Mobile renderer results on a desktop do not establish phone performance; measure the target device before setting production budgets.
 
 ### Earlier validation — 2026-10-05 (source revision 7d48a1e)
 
@@ -81,7 +81,7 @@ Draw calls stayed at **3**. Whole-frame samples include simulation, rendering an
 
 The earlier sparse-foam revision's matched captures at **4 / 6 / 8 seconds** show blue troughs, cyan elevated faces, fine glints and broken crest ribbons. Diagnostic foam coverage in the fixed ocean rectangle (rows 450–1079, full width; display-space mask > 0.25) changed from **65.33 / 33.15 / 42.54%** to **24.87 / 1.82 / 0.86%**: about **80% less average visible coverage**. This is a screen-space comparison from that older revision, not a physical foam-area measurement or current baseline.
 
-Forward+ and Mobile captures passed directional crest-light suppression, sunlight energy/color response and minimum-roughness/grazing checks. Repeated switching, restoration after manual edits, color synchronization, seeded resets and invalid selections passed in both renderers. Mobile warns about the original scene's volumetric fog while loading Scene Defaults; Daylight uses supported depth haze. Scattering and trough darkness remain art-directed approximations on opaque FFT water.
+Forward+ and Mobile captures passed directional crest-light suppression, sunlight energy/color response and minimum-roughness/grazing checks. Repeated switching, restoration after manual edits, color synchronization, seeded resets and invalid selections passed in both renderers. The archived Mobile run warned about volumetric fog in the removed scene-default baseline; the active Daylight setup uses supported depth haze. Scattering and trough darkness remain art-directed approximations on opaque FFT water.
 
 ## Introduction
 ### Why Fourier Transforms?
@@ -179,5 +179,4 @@ The displacement, normal, and foam maps generated after running FFT on our direc
 
 ## Attribution
 **[Kloofendal 48d Partly Cloudy (Pure Sky)](https://polyhaven.com/a/kloofendal_48d_partly_cloudy_puresky)** by **Greg Zaal** (original) and **Jarod Guest** (sky edits), from Poly Haven, is used under **[CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/)**. The source is the tonemapped JPG; the Godot import is limited to 4096 px.\
-**[Evening Road 01 (Pure Sky)](https://polyhaven.com/a/evening_road_01_puresky)** by **Jarod Guest** is used under the [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) license.\
 **[OTFFT DIT Stockham Algorithm](http://wwwa.pikara.ne.jp/okojisan/otfft-en/stockham3.html)** by **Takuya Okahisa** is used and modified under the [MIT](http://wwwa.pikara.ne.jp/okojisan/otfft-en/download.html) license.

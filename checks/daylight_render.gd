@@ -2,7 +2,7 @@ extends SceneTree
 ## Full-quality Daylight Ocean timings. Add -- --capture for fixed-time PNG comparisons.
 ## Run without --headless, with --disable-vsync, and no other GPU workload.
 
-var output := 'user://daylight-validation/' + RenderingServer.get_current_rendering_method() + '-' + RenderingServer.get_current_rendering_driver_name()
+var output := 'user://daylight-only-validation/' + RenderingServer.get_current_rendering_method() + '-' + RenderingServer.get_current_rendering_driver_name()
 
 func _initialize() -> void:
 	_run.call_deferred()
