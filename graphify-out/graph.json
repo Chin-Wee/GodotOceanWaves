@@ -5585,7 +5585,7 @@
       "node_kind": "heading",
       "norm_label": "attribution",
       "source_file": "README.md",
-      "source_location": "L182"
+      "source_location": "L180"
     },
     {
       "id": "readme_daylight_controls",
@@ -5684,18 +5684,6 @@
       "source_location": "L98"
     },
     {
-      "id": "readme_load_balancing",
-      "label": "Load Balancing",
-      "_origin": "ast",
-      "community": 17,
-      "community_name": "GodotOceanWaves",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "load balancing",
-      "source_file": "README.md",
-      "source_location": "L164"
-    },
-    {
       "id": "readme_ocean_wave_spectra",
       "label": "Ocean-Wave Spectra",
       "_origin": "ast",
@@ -5729,7 +5717,7 @@
       "node_kind": "heading",
       "norm_label": "references",
       "source_file": "README.md",
-      "source_location": "L173"
+      "source_location": "L171"
     },
     {
       "id": "readme_results",
@@ -5766,6 +5754,18 @@
       "norm_label": "sea spray",
       "source_file": "README.md",
       "source_location": "L106"
+    },
+    {
+      "id": "readme_update_rate",
+      "label": "Update Rate",
+      "_origin": "ast",
+      "community": 17,
+      "community_name": "GodotOceanWaves",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "update rate",
+      "source_file": "README.md",
+      "source_location": "L164"
     },
     {
       "id": "readme_water_setup",
@@ -12202,7 +12202,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "README.md",
-      "source_location": "L173",
+      "source_location": "L171",
       "weight": 1.0
     },
     {
@@ -12213,7 +12213,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "README.md",
-      "source_location": "L182",
+      "source_location": "L180",
       "weight": 1.0
     },
     {
@@ -12405,7 +12405,7 @@
     },
     {
       "source": "readme_wave_simulation",
-      "target": "readme_load_balancing",
+      "target": "readme_update_rate",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -14074,5 +14074,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "1f254880277647afd0eeec09421e5e2d17b9ca9c"
+  "built_at_commit": "43960e01c2ab3c3749824c9b87b7158e602317da"
 }
