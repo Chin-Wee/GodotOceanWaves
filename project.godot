@@ -16,6 +16,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 
 config/name="OceanWaves"
 run/main_scene="res://main.tscn"
+run/max_fps=60
 config/features=PackedStringArray("4.7", "Forward Plus")
 boot_splash/show_image=false
 config/icon="res://icon.svg"
@@ -35,7 +36,7 @@ gdscript/warnings/integer_division=0
 
 window/stretch/mode="canvas_items"
 window/stretch/aspect="ignore"
-window/vsync/vsync_mode=3
+window/vsync/vsync_mode=1
 window/quality/msaa_2d=0
 window/quality/msaa_3d=1
 window/show_image=false

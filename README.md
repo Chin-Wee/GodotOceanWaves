@@ -56,13 +56,15 @@ godot --path . --script res://checks/sea_presets.gd --audio-driver Dummy
 godot --path . --script res://checks/interaction_foam.gd --audio-driver Dummy
 godot --path . --script res://checks/sea_presets.gd --audio-driver Dummy --rendering-method mobile
 # Daylight timings: same 1920×1080 camera, four 10-second samples.
-godot --path . --script res://checks/daylight_render.gd --audio-driver Dummy --disable-vsync
-godot --path . --script res://checks/daylight_render.gd --audio-driver Dummy --disable-vsync --rendering-method mobile
+godot --path . --script res://checks/daylight_render.gd --audio-driver Dummy --disable-vsync --max-fps 0
+godot --path . --script res://checks/daylight_render.gd --audio-driver Dummy --disable-vsync --max-fps 0 --rendering-method mobile
 # Fixed 60 Hz simulation: capture 4/6/8-second phases and diagnostic foam/light images.
 godot --path . --script res://checks/daylight_render.gd --audio-driver Dummy --disable-vsync --max-fps 60 -- --capture
 ```
 
 The water check covers startup with the sole Daylight setup, deterministic seeds and sea-state changes. Capture mode matches camera, seed, simulation time, FFT resolution, mesh quality, update cadence and particle count. Output is in the printed `user://daylight-only-validation` folder. Timings report wall-clock frame mean/P95 separately from measured viewport CPU/GPU time. Only compare benchmark samples with `render_timing_reliable: true`; unchanged/unavailable timestamps are flagged. A zero GPU timestamp means unavailable measurement; viewport time does not include every external FFT compute operation. The check temporarily keeps its window above other windows to avoid occluded-window timing samples. Keep other GPU workloads closed for comparisons. On this Godot/Metal build, readback fences and GPU timestamps can fail; `--rendering-driver vulkan` provides an alternative when validating on macOS. Mobile renderer results on a desktop do not establish phone performance; measure the target device before setting production budgets.
+
+Runtime is capped at **60 FPS** to limit unnecessary GPU work and heat. Performance commands set `--max-fps 0` to measure uncapped headroom.
 
 ### Earlier validation — 2026-10-05 (source revision 7d48a1e)
 

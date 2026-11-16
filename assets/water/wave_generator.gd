@@ -13,10 +13,10 @@ var descriptors : Dictionary
 var foam_states_texture := Texture2DArrayRD.new()
 var foam_state_index := 0
 
-# Generator state per invocation of `update()`.
 var pass_parameters : Array[WaveCascadeParameters]
-var pass_num_cascades_remaining : int
+var next_cascade_index := 0
 var pass_delta := 0.0
+var cascade_elapsed: Array[float] = []
 
 func init_gpu(num_cascades : int) -> void:
 	# --- DEVICE/SHADER CREATION ---
@@ -73,13 +73,23 @@ func init_gpu(num_cascades : int) -> void:
 	pipelines[&'fft_butterfly'].call(context, compute_list)
 	context.compute_list_end()
 
-func _process(delta: float) -> void:
-	# Update one cascade each frame for load balancing.
-	if pass_num_cascades_remaining == 0: return
-	pass_num_cascades_remaining -= 1
+func _process(_delta: float) -> void:
+	# Update one cascade each frame; skip stale work and use its real elapsed time.
+	if pass_parameters.is_empty(): return
+	var count := pass_parameters.size()
+	var cascade_index := -1
+	for offset in count:
+		var candidate := (next_cascade_index + offset) % count
+		if cascade_elapsed[candidate] > 0.0:
+			cascade_index = candidate
+			break
+	if cascade_index < 0: return
+	pass_delta = cascade_elapsed[cascade_index]
+	cascade_elapsed[cascade_index] = 0.0
+	next_cascade_index = (cascade_index + 1) % count
 
 	var compute_list := context.compute_list_begin()
-	_update(compute_list, pass_num_cascades_remaining, pass_parameters)
+	_update(compute_list, cascade_index, pass_parameters)
 	context.compute_list_end()
 
 func _update(compute_list : int, cascade_index : int, parameters : Array[WaveCascadeParameters]) -> void:
@@ -111,27 +121,22 @@ func _update(compute_list : int, cascade_index : int, parameters : Array[WaveCas
 	foam_states_texture.texture_rd_rid = descriptors[&'foam_state_a' if foam_state_index == 0 else &'foam_state_b'].rid
 	RenderingServer.global_shader_parameter_set(&'foam_states', foam_states_texture)
 
-## Begins updating wave cascades based on the provided parameters. To balance stutter,
-## the generator will schedule one cascade update per frame. All cascades from the
-## previous invocation that have not been processed yet will be updated.
+## Accumulates parameter time and schedules at most one cascade update per frame.
 func update(delta : float, parameters : Array[WaveCascadeParameters]) -> void:
 	assert(parameters.size() != 0)
 	if not context:
 		init_gpu(maxi(2, len(parameters))) # FIXME: This is needed because my RenderContext API sucks...
-	elif pass_num_cascades_remaining != 0: # Update cascades from previous invocation that have yet to be processed...
-		var compute_list := context.compute_list_begin()
-		for i in range(pass_num_cascades_remaining):
-			_update(compute_list, i, pass_parameters)
-		context.compute_list_end()
+	if cascade_elapsed.size() != parameters.size():
+		cascade_elapsed.resize(parameters.size())
 
 	# Update each cascade's parameters that rely on time delta
 	for i in len(parameters):
 		var params := parameters[i]
 		params.time += delta
-	pass_delta = delta
+		cascade_elapsed[i] += delta
 
 	pass_parameters = parameters
-	pass_num_cascades_remaining = len(parameters)
+	next_cascade_index %= parameters.size()
 
 func _notification(what):
 	if what == NOTIFICATION_PREDELETE:

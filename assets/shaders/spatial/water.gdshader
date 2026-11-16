@@ -114,7 +114,12 @@ void fragment() {
 		float ppm = map_size * min(scales.x, scales.y); // Pixels per meter
 		// Mix between bicubic and bilinear filtering depending on the world space pixels per meter.
 		// This is dependent on the tile size as well as displacement/normal map resolution.
-		gradient += mix(texture_bicubic(normals, coords), texture(normals, coords), min(1.0, ppm*0.1)).xyw * vec3(scales.ww, 1.0);
+		float bilinear_weight = min(1.0, ppm*0.1);
+		vec4 normal_sample = texture(normals, coords);
+		if (bilinear_weight < 1.0) {
+			normal_sample = mix(texture_bicubic(normals, coords), normal_sample, bilinear_weight);
+		}
+		gradient += normal_sample.xyw * vec3(scales.ww, 1.0);
 		vec2 state = texture(foam_states, coords).rg;
 		foam_state = max(foam_state, state);
 	}
