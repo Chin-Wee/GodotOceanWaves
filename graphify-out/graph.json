@@ -5585,7 +5585,7 @@
       "node_kind": "heading",
       "norm_label": "attribution",
       "source_file": "README.md",
-      "source_location": "L187"
+      "source_location": "L180"
     },
     {
       "id": "readme_daylight_controls",
@@ -5597,7 +5597,7 @@
       "node_kind": "heading",
       "norm_label": "daylight controls",
       "source_file": "README.md",
-      "source_location": "L21"
+      "source_location": "L14"
     },
     {
       "id": "readme_earlier_validation_2026_10_05_source_revision_7d48a1e",
@@ -5609,7 +5609,7 @@
       "node_kind": "heading",
       "norm_label": "earlier validation \u2014 2026-10-05 (source revision 7d48a1e)",
       "source_file": "README.md",
-      "source_location": "L74"
+      "source_location": "L67"
     },
     {
       "id": "readme_embedded_panel_input",
@@ -5621,7 +5621,7 @@
       "node_kind": "heading",
       "norm_label": "embedded panel input",
       "source_file": "README.md",
-      "source_location": "L38"
+      "source_location": "L31"
     },
     {
       "id": "readme_fast_fourier_transform",
@@ -5633,7 +5633,7 @@
       "node_kind": "heading",
       "norm_label": "fast fourier transform",
       "source_file": "README.md",
-      "source_location": "L159"
+      "source_location": "L152"
     },
     {
       "id": "readme_freecam_foam_and_reflections",
@@ -5645,7 +5645,7 @@
       "node_kind": "heading",
       "norm_label": "freecam, foam and reflections",
       "source_file": "README.md",
-      "source_location": "L44"
+      "source_location": "L37"
     },
     {
       "id": "readme_godotoceanwaves",
@@ -5669,7 +5669,7 @@
       "node_kind": "heading",
       "norm_label": "introduction",
       "source_file": "README.md",
-      "source_location": "L93"
+      "source_location": "L86"
     },
     {
       "id": "readme_lighting_model",
@@ -5681,7 +5681,7 @@
       "node_kind": "heading",
       "norm_label": "lighting model",
       "source_file": "README.md",
-      "source_location": "L103"
+      "source_location": "L96"
     },
     {
       "id": "readme_load_balancing",
@@ -5693,7 +5693,7 @@
       "node_kind": "heading",
       "norm_label": "load balancing",
       "source_file": "README.md",
-      "source_location": "L169"
+      "source_location": "L162"
     },
     {
       "id": "readme_ocean_wave_spectra",
@@ -5705,7 +5705,7 @@
       "node_kind": "heading",
       "norm_label": "ocean-wave spectra",
       "source_file": "README.md",
-      "source_location": "L125"
+      "source_location": "L118"
     },
     {
       "id": "readme_preset_validation",
@@ -5717,7 +5717,7 @@
       "node_kind": "heading",
       "norm_label": "preset validation",
       "source_file": "README.md",
-      "source_location": "L54"
+      "source_location": "L47"
     },
     {
       "id": "readme_references",
@@ -5729,7 +5729,7 @@
       "node_kind": "heading",
       "norm_label": "references",
       "source_file": "README.md",
-      "source_location": "L178"
+      "source_location": "L171"
     },
     {
       "id": "readme_results",
@@ -5741,7 +5741,7 @@
       "node_kind": "heading",
       "norm_label": "results",
       "source_file": "README.md",
-      "source_location": "L101"
+      "source_location": "L94"
     },
     {
       "id": "readme_sea_foam",
@@ -5753,19 +5753,7 @@
       "node_kind": "heading",
       "norm_label": "sea foam",
       "source_file": "README.md",
-      "source_location": "L108"
-    },
-    {
-      "id": "readme_sea_presets",
-      "label": "Sea presets",
-      "_origin": "ast",
-      "community": 17,
-      "community_name": "GodotOceanWaves",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "sea presets",
-      "source_file": "README.md",
-      "source_location": "L6"
+      "source_location": "L101"
     },
     {
       "id": "readme_sea_spray",
@@ -5777,7 +5765,19 @@
       "node_kind": "heading",
       "norm_label": "sea spray",
       "source_file": "README.md",
-      "source_location": "L111"
+      "source_location": "L104"
+    },
+    {
+      "id": "readme_water_setup",
+      "label": "Water setup",
+      "_origin": "ast",
+      "community": 17,
+      "community_name": "GodotOceanWaves",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "water setup",
+      "source_file": "README.md",
+      "source_location": "L6"
     },
     {
       "id": "readme_wave_cascades",
@@ -5789,7 +5789,7 @@
       "node_kind": "heading",
       "norm_label": "wave cascades",
       "source_file": "README.md",
-      "source_location": "L164"
+      "source_location": "L157"
     },
     {
       "id": "readme_wave_shading",
@@ -5801,7 +5801,7 @@
       "node_kind": "heading",
       "norm_label": "wave shading",
       "source_file": "README.md",
-      "source_location": "L102"
+      "source_location": "L95"
     },
     {
       "id": "readme_wave_simulation",
@@ -5813,7 +5813,7 @@
       "node_kind": "heading",
       "norm_label": "wave simulation",
       "source_file": "README.md",
-      "source_location": "L120"
+      "source_location": "L113"
     },
     {
       "id": "readme_why_fourier_transforms",
@@ -5825,7 +5825,7 @@
       "node_kind": "heading",
       "norm_label": "why fourier transforms?",
       "source_file": "README.md",
-      "source_location": "L94"
+      "source_location": "L87"
     },
     {
       "id": "addons_imgui_godot_imguigodot_internal_input_cs_imguiioptr",
@@ -12196,24 +12196,13 @@
     },
     {
       "source": "readme_godotoceanwaves",
-      "target": "readme_results",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "README.md",
-      "source_location": "L101",
-      "weight": 1.0
-    },
-    {
-      "source": "readme_godotoceanwaves",
       "target": "readme_references",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "README.md",
-      "source_location": "L178",
+      "source_location": "L171",
       "weight": 1.0
     },
     {
@@ -12224,12 +12213,12 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "README.md",
-      "source_location": "L187",
+      "source_location": "L180",
       "weight": 1.0
     },
     {
       "source": "readme_godotoceanwaves",
-      "target": "readme_sea_presets",
+      "target": "readme_water_setup",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -12246,7 +12235,18 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "README.md",
-      "source_location": "L93",
+      "source_location": "L86",
+      "weight": 1.0
+    },
+    {
+      "source": "readme_godotoceanwaves",
+      "target": "readme_results",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "source_location": "L94",
       "weight": 1.0
     },
     {
@@ -12257,18 +12257,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "README.md",
-      "source_location": "L94",
-      "weight": 1.0
-    },
-    {
-      "source": "readme_results",
-      "target": "readme_wave_shading",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "README.md",
-      "source_location": "L102",
+      "source_location": "L87",
       "weight": 1.0
     },
     {
@@ -12279,73 +12268,73 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "README.md",
-      "source_location": "L120",
+      "source_location": "L113",
       "weight": 1.0
     },
     {
-      "source": "readme_sea_presets",
+      "source": "readme_results",
+      "target": "readme_wave_shading",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "source_location": "L95",
+      "weight": 1.0
+    },
+    {
+      "source": "readme_water_setup",
       "target": "readme_daylight_controls",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "README.md",
-      "source_location": "L21",
+      "source_location": "L14",
       "weight": 1.0
     },
     {
-      "source": "readme_sea_presets",
+      "source": "readme_water_setup",
       "target": "readme_embedded_panel_input",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "README.md",
-      "source_location": "L38",
+      "source_location": "L31",
       "weight": 1.0
     },
     {
-      "source": "readme_sea_presets",
+      "source": "readme_water_setup",
       "target": "readme_freecam_foam_and_reflections",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "README.md",
-      "source_location": "L44",
+      "source_location": "L37",
       "weight": 1.0
     },
     {
-      "source": "readme_sea_presets",
+      "source": "readme_water_setup",
       "target": "readme_preset_validation",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "README.md",
-      "source_location": "L54",
+      "source_location": "L47",
       "weight": 1.0
     },
     {
-      "source": "readme_sea_presets",
+      "source": "readme_water_setup",
       "target": "readme_earlier_validation_2026_10_05_source_revision_7d48a1e",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "README.md",
-      "source_location": "L74",
-      "weight": 1.0
-    },
-    {
-      "source": "readme_wave_shading",
-      "target": "readme_lighting_model",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "README.md",
-      "source_location": "L103",
+      "source_location": "L67",
       "weight": 1.0
     },
     {
@@ -12356,7 +12345,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "README.md",
-      "source_location": "L108",
+      "source_location": "L101",
       "weight": 1.0
     },
     {
@@ -12367,7 +12356,18 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "README.md",
-      "source_location": "L111",
+      "source_location": "L104",
+      "weight": 1.0
+    },
+    {
+      "source": "readme_wave_shading",
+      "target": "readme_lighting_model",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "source_location": "L96",
       "weight": 1.0
     },
     {
@@ -12378,7 +12378,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "README.md",
-      "source_location": "L125",
+      "source_location": "L118",
       "weight": 1.0
     },
     {
@@ -12389,7 +12389,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "README.md",
-      "source_location": "L159",
+      "source_location": "L152",
       "weight": 1.0
     },
     {
@@ -12400,7 +12400,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "README.md",
-      "source_location": "L164",
+      "source_location": "L157",
       "weight": 1.0
     },
     {
@@ -12411,7 +12411,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "README.md",
-      "source_location": "L169",
+      "source_location": "L162",
       "weight": 1.0
     },
     {
@@ -14074,5 +14074,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "0de5ddda735d301a48bc2abb6ded362e51328770"
+  "built_at_commit": "d7a35fec36c218fb97fc6ba56f99b7db71eefafe"
 }
