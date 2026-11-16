@@ -12,11 +12,7 @@ var pipelines : Dictionary
 var descriptors : Dictionary
 var foam_states_texture := Texture2DArrayRD.new()
 var foam_state_index := 0
-
-var pass_parameters : Array[WaveCascadeParameters]
-var next_cascade_index := 0
 var pass_delta := 0.0
-var cascade_elapsed: Array[float] = []
 
 func init_gpu(num_cascades : int) -> void:
 	# --- DEVICE/SHADER CREATION ---
@@ -73,25 +69,6 @@ func init_gpu(num_cascades : int) -> void:
 	pipelines[&'fft_butterfly'].call(context, compute_list)
 	context.compute_list_end()
 
-func _process(_delta: float) -> void:
-	# Update one cascade each frame; skip stale work and use its real elapsed time.
-	if pass_parameters.is_empty(): return
-	var count := pass_parameters.size()
-	var cascade_index := -1
-	for offset in count:
-		var candidate := (next_cascade_index + offset) % count
-		if cascade_elapsed[candidate] > 0.0:
-			cascade_index = candidate
-			break
-	if cascade_index < 0: return
-	pass_delta = cascade_elapsed[cascade_index]
-	cascade_elapsed[cascade_index] = 0.0
-	next_cascade_index = (cascade_index + 1) % count
-
-	var compute_list := context.compute_list_begin()
-	_update(compute_list, cascade_index, pass_parameters)
-	context.compute_list_end()
-
 func _update(compute_list : int, cascade_index : int, parameters : Array[WaveCascadeParameters]) -> void:
 	var params := parameters[cascade_index]
 	## --- WAVE SPECTRA UPDATE ---
@@ -121,22 +98,20 @@ func _update(compute_list : int, cascade_index : int, parameters : Array[WaveCas
 	foam_states_texture.texture_rd_rid = descriptors[&'foam_state_a' if foam_state_index == 0 else &'foam_state_b'].rid
 	RenderingServer.global_shader_parameter_set(&'foam_states', foam_states_texture)
 
-## Accumulates parameter time and schedules at most one cascade update per frame.
+## Updates every cascade together so their surface animation stays phase-coherent.
 func update(delta : float, parameters : Array[WaveCascadeParameters]) -> void:
 	assert(parameters.size() != 0)
 	if not context:
 		init_gpu(maxi(2, len(parameters))) # FIXME: This is needed because my RenderContext API sucks...
-	if cascade_elapsed.size() != parameters.size():
-		cascade_elapsed.resize(parameters.size())
 
-	# Update each cascade's parameters that rely on time delta
-	for i in len(parameters):
-		var params := parameters[i]
+	pass_delta = delta
+	for params: WaveCascadeParameters in parameters:
 		params.time += delta
-		cascade_elapsed[i] += delta
 
-	pass_parameters = parameters
-	next_cascade_index %= parameters.size()
+	var compute_list := context.compute_list_begin()
+	for i in len(parameters):
+		_update(compute_list, i, parameters)
+	context.compute_list_end()
 
 func _notification(what):
 	if what == NOTIFICATION_PREDELETE:

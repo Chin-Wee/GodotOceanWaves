@@ -49,9 +49,8 @@ func _capture(scene : Node3D, matching_camera : Transform3D) -> void:
 	spray.seed = 1234
 	spray.restart()
 	for step in 480:
-		# Exact 60 Hz simulation, completing all three cascades before the next frame.
+		# Exact 60 Hz simulation through the same update path used at runtime.
 		water._update_water(1.0/60.0)
-		for cascade in 3: water.wave_generator._process(0.0)
 		await process_frame
 		if step + 1 in [240, 360, 480]:
 			var prefix := 'daylight'

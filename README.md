@@ -161,10 +161,8 @@ At large-enough distances—especially with sea foam present—tiling artifacts 
 
 Each wave cascades’ parameters and size must be carefully chosen to avoid wave interference when layered. Similarly, the cascades' wave phases should be offset to avoid interference with other cascades. The generation system automatically attempts this by offsetting each cascades’ start times differently (honestly, not sure if it works lol).
 
-#### Load Balancing
-Due to the erratic nature of wave motion, their movement can appear perceptually smooth even without updating their displacements every frame. Thus, an "update rate" parameter was introduced to control how often wave cascades are updated per second. While this reduces the amount of GPU-time spent working on FFT, frames during which the wave generation pipeline runs still stutter.
-
-An experiment to asynchronously compute cascade updates using Godot's local RenderingDevices, caused significant performance overhead due to transferring textures between the CPU and GPU. Instead, the wave generation system *attempts to load-balance cascades*. Whenever the frame time is shorter than the update rate, only one cascade is updated per frame. This reduces stuttering while still benefiting from the lower GPU workload of frame skipping.
+#### Update Rate
+The update-rate setting controls how often the complete wave simulation runs. Every update recomputes all cascades together, keeping their phases synchronized. Lower rates reduce GPU work but make wave motion less smooth; use zero to update every rendered frame.
 
 The displacement, normal, and foam maps generated after running FFT on our directional ocean-wave spectrum function (along with its associated parameters) yield realistic surface motion across a broad range of ocean-wave environments.
 
