@@ -1,7 +1,7 @@
-# Graph Report - GodotOceanWaves  (2026-11-16)
+# Graph Report - GodotOceanWaves  (2026-11-17)
 
 ## Corpus Check
-- 24 files · ~624,039 words
+- 24 files · ~624,065 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 114 file(s) not represented in the graph (top: .uid 29, .gd 22, .import 21)
 
@@ -11,7 +11,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `d7a35fec`
+- Built from commit: `1f254880`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 

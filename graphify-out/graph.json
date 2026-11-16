@@ -5585,7 +5585,7 @@
       "node_kind": "heading",
       "norm_label": "attribution",
       "source_file": "README.md",
-      "source_location": "L180"
+      "source_location": "L182"
     },
     {
       "id": "readme_daylight_controls",
@@ -5609,7 +5609,7 @@
       "node_kind": "heading",
       "norm_label": "earlier validation \u2014 2026-10-05 (source revision 7d48a1e)",
       "source_file": "README.md",
-      "source_location": "L67"
+      "source_location": "L69"
     },
     {
       "id": "readme_embedded_panel_input",
@@ -5633,7 +5633,7 @@
       "node_kind": "heading",
       "norm_label": "fast fourier transform",
       "source_file": "README.md",
-      "source_location": "L152"
+      "source_location": "L154"
     },
     {
       "id": "readme_freecam_foam_and_reflections",
@@ -5669,7 +5669,7 @@
       "node_kind": "heading",
       "norm_label": "introduction",
       "source_file": "README.md",
-      "source_location": "L86"
+      "source_location": "L88"
     },
     {
       "id": "readme_lighting_model",
@@ -5681,7 +5681,7 @@
       "node_kind": "heading",
       "norm_label": "lighting model",
       "source_file": "README.md",
-      "source_location": "L96"
+      "source_location": "L98"
     },
     {
       "id": "readme_load_balancing",
@@ -5693,7 +5693,7 @@
       "node_kind": "heading",
       "norm_label": "load balancing",
       "source_file": "README.md",
-      "source_location": "L162"
+      "source_location": "L164"
     },
     {
       "id": "readme_ocean_wave_spectra",
@@ -5705,7 +5705,7 @@
       "node_kind": "heading",
       "norm_label": "ocean-wave spectra",
       "source_file": "README.md",
-      "source_location": "L118"
+      "source_location": "L120"
     },
     {
       "id": "readme_preset_validation",
@@ -5729,7 +5729,7 @@
       "node_kind": "heading",
       "norm_label": "references",
       "source_file": "README.md",
-      "source_location": "L171"
+      "source_location": "L173"
     },
     {
       "id": "readme_results",
@@ -5741,7 +5741,7 @@
       "node_kind": "heading",
       "norm_label": "results",
       "source_file": "README.md",
-      "source_location": "L94"
+      "source_location": "L96"
     },
     {
       "id": "readme_sea_foam",
@@ -5753,7 +5753,7 @@
       "node_kind": "heading",
       "norm_label": "sea foam",
       "source_file": "README.md",
-      "source_location": "L101"
+      "source_location": "L103"
     },
     {
       "id": "readme_sea_spray",
@@ -5765,7 +5765,7 @@
       "node_kind": "heading",
       "norm_label": "sea spray",
       "source_file": "README.md",
-      "source_location": "L104"
+      "source_location": "L106"
     },
     {
       "id": "readme_water_setup",
@@ -5789,7 +5789,7 @@
       "node_kind": "heading",
       "norm_label": "wave cascades",
       "source_file": "README.md",
-      "source_location": "L157"
+      "source_location": "L159"
     },
     {
       "id": "readme_wave_shading",
@@ -5801,7 +5801,7 @@
       "node_kind": "heading",
       "norm_label": "wave shading",
       "source_file": "README.md",
-      "source_location": "L95"
+      "source_location": "L97"
     },
     {
       "id": "readme_wave_simulation",
@@ -5813,7 +5813,7 @@
       "node_kind": "heading",
       "norm_label": "wave simulation",
       "source_file": "README.md",
-      "source_location": "L113"
+      "source_location": "L115"
     },
     {
       "id": "readme_why_fourier_transforms",
@@ -5825,7 +5825,7 @@
       "node_kind": "heading",
       "norm_label": "why fourier transforms?",
       "source_file": "README.md",
-      "source_location": "L87"
+      "source_location": "L89"
     },
     {
       "id": "addons_imgui_godot_imguigodot_internal_input_cs_imguiioptr",
@@ -12202,7 +12202,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "README.md",
-      "source_location": "L171",
+      "source_location": "L173",
       "weight": 1.0
     },
     {
@@ -12213,7 +12213,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "README.md",
-      "source_location": "L180",
+      "source_location": "L182",
       "weight": 1.0
     },
     {
@@ -12235,7 +12235,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "README.md",
-      "source_location": "L86",
+      "source_location": "L88",
       "weight": 1.0
     },
     {
@@ -12246,7 +12246,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "README.md",
-      "source_location": "L94",
+      "source_location": "L96",
       "weight": 1.0
     },
     {
@@ -12257,7 +12257,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "README.md",
-      "source_location": "L87",
+      "source_location": "L89",
       "weight": 1.0
     },
     {
@@ -12268,7 +12268,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "README.md",
-      "source_location": "L113",
+      "source_location": "L115",
       "weight": 1.0
     },
     {
@@ -12279,7 +12279,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "README.md",
-      "source_location": "L95",
+      "source_location": "L97",
       "weight": 1.0
     },
     {
@@ -12334,7 +12334,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "README.md",
-      "source_location": "L67",
+      "source_location": "L69",
       "weight": 1.0
     },
     {
@@ -12345,7 +12345,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "README.md",
-      "source_location": "L101",
+      "source_location": "L103",
       "weight": 1.0
     },
     {
@@ -12356,7 +12356,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "README.md",
-      "source_location": "L104",
+      "source_location": "L106",
       "weight": 1.0
     },
     {
@@ -12367,7 +12367,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "README.md",
-      "source_location": "L96",
+      "source_location": "L98",
       "weight": 1.0
     },
     {
@@ -12378,7 +12378,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "README.md",
-      "source_location": "L118",
+      "source_location": "L120",
       "weight": 1.0
     },
     {
@@ -12389,7 +12389,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "README.md",
-      "source_location": "L152",
+      "source_location": "L154",
       "weight": 1.0
     },
     {
@@ -12400,7 +12400,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "README.md",
-      "source_location": "L157",
+      "source_location": "L159",
       "weight": 1.0
     },
     {
@@ -12411,7 +12411,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "README.md",
-      "source_location": "L162",
+      "source_location": "L164",
       "weight": 1.0
     },
     {
@@ -14074,5 +14074,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "d7a35fec36c218fb97fc6ba56f99b7db71eefafe"
+  "built_at_commit": "1f254880277647afd0eeec09421e5e2d17b9ca9c"
 }
